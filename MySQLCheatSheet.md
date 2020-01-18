@@ -12,3 +12,4 @@
 * SHOW COLUMNS FROM tag;
 * INSERT INTO tag(name,description,created,updated,profile_username) VALUES ('political','Use this tag to track questions that involve management over groups of people',STR_TO_DATE('01-22-2020','%m-%d-%Y'),STR_TO_DATE('01-24-2020','%m-%d-%Y'),'ammc');
 * INSERT INTO question(id,prompt,description,created,updated,profile_username) VALUES (1,'Do you like the president?', 'I often here stats given by the media on the subject but id like to see for myself', STR_TO_DATE('01-17-2002','%m-%d-%Y'), STR_TO_DATE('01-27-20','%m-%d-%Y'),'ammc');
+* INSERT INTO status(title,description,created,updated,profile_username) VALUES ('active','currently being displayed across the site',STR_TO_DATE('01-23-2020','%m-%d-%Y'),STR_TO_DATE('01-24-2020','%m-%d-%Y'),'ammc');
