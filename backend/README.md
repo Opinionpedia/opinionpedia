@@ -20,6 +20,36 @@ With the backend running, do:
 sh test.sh
 ```
 
+## How to create a user and log in
+
+```
+host=localhost:3000
+
+request() {
+  curl -sS -X $method -H 'Content-Type: application/json' -d "$body" $host$path
+}
+
+method=POST
+path=/api/profile
+body='{
+    "username": "ammc",
+    "password": "some password",
+    "body": "Body for profile ammc",
+    "description": "Description for profile ammc"
+}'
+request
+
+method=POST
+path=/api/login
+body='{
+    "username": "ammc",
+    "password": "some password"
+}'
+token=$(request)
+
+echo Your authentication token is $token, please save it
+```
+
 ## List of available routes
 
 ### Profiles
