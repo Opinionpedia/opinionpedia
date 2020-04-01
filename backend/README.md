@@ -25,7 +25,7 @@ sh test.sh
 ```
 host=localhost:3000
 
-request() {
+send_request() {
     curl -sS -X $method -H 'Content-Type: application/json' -d "$body" $host$path
 }
 
@@ -37,7 +37,7 @@ body='{
     "body": "Body for profile ammc",
     "description": "Description for profile ammc"
 }'
-request
+send_request
 
 method=POST
 path=/api/login
@@ -45,7 +45,7 @@ body='{
     "username": "ammc",
     "password": "some password"
 }'
-token=$(request)
+token=$(send_request)
 
 echo Your authentication token is $token, please save it
 ```
