@@ -7,6 +7,6 @@
 - Diagram was created in Oracle Datamodeler.
 - DDL scripts were originally exported in Oracle Database 11g
 
-![ER Diagram](./assets/opinionpedia_v1_ER_diagram.JPG)
-![Relational Diagram](./assets/opinionpedia_v1_relational_diagram.JPG)
+![ER Diagram](./assets/logical_diagram.JPG)
+![Relational Diagram](./assets/relational_diagram.JPG)
 
