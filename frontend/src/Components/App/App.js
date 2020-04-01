@@ -11,6 +11,7 @@ import { Button,
          Alignment,
          FormGroup,
          InputGroup,
+         Icon,
          Card 
 } from "@blueprintjs/core";
 
@@ -37,6 +38,21 @@ export default function App() {
             </Link>
             <Link to="/about">
               <Button to="/about" className="bp3-minimal" icon="document" text="About Us" />
+            </Link>
+          </Navbar.Group>
+        </Navbar>
+        <Navbar>
+          <Navbar.Group>
+            <Icon icon="key" />
+            <Navbar.Divider />
+            <Link to="/signup">
+              <Button to="/signup" className="bp3-minimal" text="Sign Up" />
+            </Link>
+            <Link to="/login">
+              <Button to="/login" className="bp3-minimal" text="Login" />
+            </Link>
+            <Link to="/logout">
+              <Button to="/logout" disabled className="bp3-minimal" text="Sign Out" />
             </Link>
           </Navbar.Group>
         </Navbar>

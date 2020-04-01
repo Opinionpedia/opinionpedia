@@ -4,7 +4,6 @@ import 'normalize.css/normalize.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
 
-
 import { Button,
          Navbar,
          Alignment,
@@ -22,8 +21,7 @@ import {
   useParams
 } from "react-router-dom";
 
-
-class Home extends React.Component {
+class Authenticator extends React.Component {
 
   handleClick() {
     console.log("hi");
@@ -32,7 +30,7 @@ class Home extends React.Component {
   render() {
     return (
       <div> 
-        <Card className="op-body">
+        <Card className="">
           <FormGroup
               helperText="Already signed up 'click here'..."
               label="Sign Up"
@@ -45,7 +43,7 @@ class Home extends React.Component {
           </FormGroup>
           <Button intent="Success" text="Sign Up"></Button>
         </Card>
-        <Card className="op-body">
+        <Card className="">
           <h1>Hello, World!</h1>
           <Button intent="success" text="button content" onClick={this.handleClick}></Button>
         </Card>
@@ -53,4 +51,4 @@ class Home extends React.Component {
     );
   }
 }
-export default Home;
+export default Authenticator;
