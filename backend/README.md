@@ -26,7 +26,7 @@ sh test.sh
 host=localhost:3000
 
 request() {
-  curl -sS -X $method -H 'Content-Type: application/json' -d "$body" $host$path
+    curl -sS -X $method -H 'Content-Type: application/json' -d "$body" $host$path
 }
 
 method=POST
