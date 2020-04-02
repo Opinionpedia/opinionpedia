@@ -6,16 +6,16 @@ import * as question from '../models/question.js';
 //
 // The endpoint are:
 //
-// List     GET  http://localhost:3000/api/question
-// Details  GET  http://localhost:3000/api/question/2
-// Create   POST http://localhost:3000/api/question
-// Modify   PUT  http://localhost:3000/api/question/2
+// List     GET  http://localhost:4000/api/question
+// Details  GET  http://localhost:4000/api/question/2
+// Create   POST http://localhost:4000/api/question
+// Modify   PUT  http://localhost:4000/api/question/2
 //
 
 export default (router) => {
     // Route method: GET
     // Route path: /question
-    // Request URL: http://localhost:3000/api/question
+    // Request URL: http://localhost:4000/api/question
     router.get('/', (req, res) => {
         withConn(res, async (conn) => {
             const questions = await question.getQuestions(conn);
@@ -26,7 +26,7 @@ export default (router) => {
 
     // Route method: GET
     // Route path: /question/:id
-    // Request URL: http://localhost:3000/api/question/2
+    // Request URL: http://localhost:4000/api/question/2
     //
     // req.params: {
     //     "id": 2
@@ -53,7 +53,7 @@ export default (router) => {
 
     // Route method: POST
     // Route path: /question
-    // Request URL: http://localhost:3000/api/question
+    // Request URL: http://localhost:4000/api/question
     //
     // req.headers.authorization: "Bearer a.b.c"
     // req.body: {
@@ -92,7 +92,7 @@ export default (router) => {
 
     // Route method: PUT
     // Route path: /question/:id
-    // Request URL: http://localhost:3000/api/question/2
+    // Request URL: http://localhost:4000/api/question/2
     //
     // req.headers.authorization: "Bearer a.b.c"
     // req.body: {

@@ -23,7 +23,7 @@ sh test.sh
 ## How to create a user and log in
 
 ```
-host=localhost:3000
+host=localhost:4000
 
 send_request() {
     curl -sS -X $method -H 'Content-Type: application/json' -d "$body" $host$path
@@ -55,18 +55,18 @@ echo Your authentication token is $token, please save it
 ### Profiles
 
 ```
-List     GET  http://localhost:3000/api/profile
-Details  GET  http://localhost:3000/api/profile/pdm
-Create   POST http://localhost:3000/api/profile
-Modify   PUT  http://localhost:3000/api/profile
-Login    POST http://localhost:3000/api/login
+List     GET  http://localhost:4000/api/profile
+Details  GET  http://localhost:4000/api/profile/pdm
+Create   POST http://localhost:4000/api/profile
+Modify   PUT  http://localhost:4000/api/profile
+Login    POST http://localhost:4000/api/login
 ```
 
 ### Questions
 
 ```
-List     GET  http://localhost:3000/api/question
-Details  GET  http://localhost:3000/api/question/2
-Create   POST http://localhost:3000/api/question
-Modify   PUT  http://localhost:3000/api/question/2
+List     GET  http://localhost:4000/api/question
+Details  GET  http://localhost:4000/api/question/2
+Create   POST http://localhost:4000/api/question
+Modify   PUT  http://localhost:4000/api/question/2
 ```

@@ -7,17 +7,17 @@ import * as profile from '../models/profile.js';
 //
 // The endpoint are:
 //
-// List     GET  http://localhost:3000/api/profile
-// Details  GET  http://localhost:3000/api/profile/pdm
-// Create   POST http://localhost:3000/api/profile
-// Modify   PUT  http://localhost:3000/api/profile
-// Login    POST http://localhost:3000/api/login
+// List     GET  http://localhost:4000/api/profile
+// Details  GET  http://localhost:4000/api/profile/pdm
+// Create   POST http://localhost:4000/api/profile
+// Modify   PUT  http://localhost:4000/api/profile
+// Login    POST http://localhost:4000/api/login
 //
 
 export default (routers) => {
     // Route method: GET
     // Route path: /profile
-    // Request URL: http://localhost:3000/api/profile
+    // Request URL: http://localhost:4000/api/profile
     routers.profile.get('/', (req, res) => {
         withConn(res, async (conn) => {
             const profiles = await profile.getProfiles(conn);
@@ -28,7 +28,7 @@ export default (routers) => {
 
     // Route method: GET
     // Route path: /profile/:username
-    // Request URL: http://localhost:3000/api/profile/pdm
+    // Request URL: http://localhost:4000/api/profile/pdm
     //
     // req.params: {
     //     "username": "pdm"
@@ -55,7 +55,7 @@ export default (routers) => {
 
     // Route method: POST
     // Route path: /profile
-    // Request URL: http://localhost:3000/api/profile
+    // Request URL: http://localhost:4000/api/profile
     //
     // req.body: {
     //     "username": "ammc",
@@ -103,7 +103,7 @@ export default (routers) => {
 
     // Route method: PUT
     // Route path: /profile
-    // Request URL: http://localhost:3000/api/profile
+    // Request URL: http://localhost:4000/api/profile
     //
     // req.headers.authorization: "Bearer a.b.c"
     // req.body: {
@@ -160,7 +160,7 @@ export default (routers) => {
 
     // Route method: POST
     // Route path: /login
-    // Request URL: http://localhost:3000/api/login
+    // Request URL: http://localhost:4000/api/login
     //
     // req.body: {
     //     "username": "ammc",

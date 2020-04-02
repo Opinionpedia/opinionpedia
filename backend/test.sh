@@ -1,5 +1,5 @@
 #!/bin/sh
-api=localhost:3000/api
+api=localhost:4000/api
 
 curl $api/profile
 echo
