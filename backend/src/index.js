@@ -17,7 +17,7 @@ setupApi(api);
 //
 const indexRoutes = [
     '/$',
-    '/person$',
+    '/signup$',
 ];
 function index(req, res) {
     res.sendFile('public/index.html', {
