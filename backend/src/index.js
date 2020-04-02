@@ -18,6 +18,9 @@ setupApi(api);
 const indexRoutes = [
     '/$',
     '/signup$',
+    '/login$',
+    '/logout$',
+    '/about$',
 ];
 function index(req, res) {
     res.sendFile('public/index.html', {
