@@ -48,44 +48,37 @@ function stringify(query) {
     return query;
 }
 
-class Conn {
-    static makeConn() {
-        return new Promise((resolve, reject) => {
-            const connection = mysql.createConnection(mysqlConfiguration);
+// Promise-ify the methods of a mysql connection object.
+class MySQLConnection {
+    constructor(options) {
+        const connection = mysql.createConnection(options);
 
-            connection.connect((err) => {
+        // This method is synchronous. No promise needed:
+        this.on = connection.on.bind(connection);
+
+        this.connection = connection;
+    }
+
+    connect() {
+        return new Promise((resolve, reject) => {
+            this.connection.connect((err) => {
                 if (err) {
                     reject(err);
                     return;
                 }
 
-                const conn = new Conn(connection);
-                resolve(conn);
+                resolve();
             });
-        });
-    }
-
-    constructor(connection) {
-        this.connection = connection;
-        connection.on('error', (err) => {
-            console.error(error);
         });
     }
 
     query(options) {
         return new Promise((resolve, reject) => {
-            const measure = new Measure();
-
             this.connection.query(options, (err, results, fields) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                const timeTaken = measure.end().toFixed(0);
-                const query = stringify(options);
-
-                console.log(`[${timeTaken}ms] ${query}`);
 
                 resolve({ results, fields });
             });
@@ -102,17 +95,52 @@ class Conn {
 
                 resolve();
             });
-
-            this.connection = null;
         });
+    }
+}
+
+class Conn {
+    constructor() {
+        const connection = new MySQLConnection(mysqlConfiguration);
+
+        // We have to register an error handler or else bad things will happen.
+        connection.on('error', console.error);
+
+        this.connection = connection;
+    }
+
+    async connect() {
+        await this.connection.connect();
+    }
+
+    async query(options) {
+        const measure = new Measure();
+
+        const { results, fields } = await this.connection.query(options);
+
+        const timeTaken = measure.end().toFixed(0);
+        const query = stringify(options);
+
+        console.log(`[${timeTaken}ms] ${query}`);
+
+        return { results, fields };
+    }
+
+    async end() {
+        const { connection } = this;
+
+        this.connection = null;
+
+        await connection.end();
     }
 }
 
 export async function withConn(res, fn) {
     // Create connection.
-    let conn;
+    const conn = new Conn();
+
     try {
-        conn = await Conn.makeConn();
+        await conn.connect();
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
@@ -138,7 +166,8 @@ export async function withConn(res, fn) {
 }
 
 async function migrate() {
-    const conn = await Conn.makeConn();
+    const conn = new Conn();
+    await conn.connect();
 
     let files = await fs.readdir('./sql/');
     files.sort();
