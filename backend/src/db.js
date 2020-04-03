@@ -194,6 +194,8 @@ async function migrateAtBoot() {
         console.error(err);
         process.exit(1);
     }
+
+    console.log('Finished setting up database');
 }
 
 migrateAtBoot();
