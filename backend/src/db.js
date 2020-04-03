@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs';
 import mysql from 'mysql';
+import { performance } from 'perf_hooks';
 
 const mysqlConfiguration = {
     user: 'root',
@@ -14,6 +15,16 @@ const mysqlConfiguration = {
 // Documentation:
 //     https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_dup_entry
 export const ERR_MYSQL_DUP_ENTRY = 'ER_DUP_ENTRY';
+
+class Measure {
+    constructor() {
+        this.start = performance.now();
+    }
+
+    end() {
+        return performance.now() - this.start;
+    }
+}
 
 function stringify(query) {
     if (typeof query === 'string') {
@@ -63,12 +74,18 @@ class Conn {
 
     query(options) {
         return new Promise((resolve, reject) => {
-            console.log(stringify(options));
+            const measure = new Measure();
+
             this.connection.query(options, (err, results, fields) => {
                 if (err) {
                     reject(err);
                     return;
                 }
+
+                const timeTaken = measure.end().toFixed(0);
+                const query = stringify(options);
+
+                console.log(`[${timeTaken}ms] ${query}`);
 
                 resolve({ results, fields });
             });
