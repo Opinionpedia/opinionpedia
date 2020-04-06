@@ -8,6 +8,20 @@ const allowedOrigins = {
     'http://localhost:3000': true,
 };
 
+const allowedHeaders = [
+    'authorization',
+    'content-type',
+].join(', ');
+
+const allowedMethods = [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'HEAD',
+    'OPTIONS',
+].join(', ');
+
 function log(req, res, next) {
     const { method, path } = req;
     console.log(`${method} ${path}`);
@@ -21,6 +35,9 @@ function cors(req, res, next) {
         res.set('Access-Control-Allow-Origin', origin);
         res.vary('Origin');
     }
+
+    res.set('Access-Control-Allow-Headers', allowedHeaders);
+    res.set('Access-Control-Allow-Methods', allowedMethods);
 
     next();
 }
