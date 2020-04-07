@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import Home from '../Home/Home';
+import Authenticator from '../Authenticator/Authenticator';
 
 import 'normalize.css/normalize.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
@@ -59,6 +60,9 @@ export default function App() {
         <Switch>
           <Route path="/about">
             <About />
+          </Route>
+          <Route path="/signup">
+            <Authenticator />
           </Route>
           <Route path="/">
             <Home />

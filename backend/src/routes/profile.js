@@ -66,7 +66,6 @@ export default (routers) => {
     routers.profile.post('/', async (req, res) => {
         withConn(res, async (conn) => {
             const { username, password: pw, body, description } = req.body;
-
             const valid =
                 profile.isUsernameValid(username) &&
                 password.isPasswordValid(pw) &&
