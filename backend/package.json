@@ -1,9 +1,13 @@
 {
   "type": "module",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "sql-template-strings": "^2.2.2"
+  },
+  "scripts": {
+    "start": "node -r dotenv/config src"
   }
 }

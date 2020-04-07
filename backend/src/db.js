@@ -2,9 +2,18 @@ import { promises as fs } from 'fs';
 import mysql from 'mysql';
 import { performance } from 'perf_hooks';
 
+if (process.env.DB_USER === undefined ||
+    process.env.DB_DATABASE === undefined ||
+    process.env.DB_PASSWORD === undefined) {
+    console.error('Error: Please set DB_USER, DB_DATABASE, and DB_PASSWORD ' +
+                  'environment variables.');
+    process.exit(1);
+}
+
 const mysqlConfiguration = {
-    user: 'root',
-    database: 'test',
+    user: process.env.DB_USER,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
 
     charset: 'utf8mb4',
     multipleStatements: true,
