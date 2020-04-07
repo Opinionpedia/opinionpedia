@@ -10,7 +10,8 @@ CREATE TABLE profile (
     created       DATE NOT NULL,
     updated       DATE NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (username)
 );
 
 CREATE TABLE question (
@@ -57,7 +58,8 @@ CREATE TABLE vote (
     created       DATE NOT NULL,
     updated       DATE NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (profile_id, question_id, option_id)
 );
 
 CREATE TABLE tag (
@@ -65,23 +67,28 @@ CREATE TABLE tag (
 
     profile_id    INTEGER NOT NULL,
 
-    name          VARCHAR(1000) NOT NULL,
+    name          VARCHAR(100) NOT NULL,
     description   TEXT NOT NULL,
 
     created       DATE NOT NULL,
     updated       DATE NOT NULL,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (name)
 );
 
 CREATE TABLE profile_tag (
     tag_id       INTEGER NOT NULL,
-    profile_id   INTEGER NOT NULL
+    profile_id   INTEGER NOT NULL,
+
+    UNIQUE (tag_id, profile_id)
 );
 
 CREATE TABLE question_tag (
     tag_id        INTEGER NOT NULL,
-    question_id   INTEGER NOT NULL
+    question_id   INTEGER NOT NULL,
+
+    UNIQUE (tag_id, question_id)
 );
 
 CREATE TABLE meta (
@@ -97,10 +104,14 @@ CREATE TABLE meta (
 
 CREATE TABLE profile_meta (
     meta_id      INTEGER NOT NULL,
-    profile_id   INTEGER NOT NULL
+    profile_id   INTEGER NOT NULL,
+
+    UNIQUE (profile_id)
 );
 
 CREATE TABLE question_meta (
     meta_id       INTEGER NOT NULL,
-    question_id   INTEGER NOT NULL
+    question_id   INTEGER NOT NULL,
+
+    UNIQUE (question_id)
 );
