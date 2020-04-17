@@ -81,14 +81,14 @@ CREATE TABLE profile_tag (
     tag_id       INTEGER NOT NULL,
     profile_id   INTEGER NOT NULL,
 
-    UNIQUE (tag_id, profile_id)
+    PRIMARY KEY (tag_id, profile_id)
 );
 
 CREATE TABLE question_tag (
     tag_id        INTEGER NOT NULL,
     question_id   INTEGER NOT NULL,
 
-    UNIQUE (tag_id, question_id)
+    PRIMARY KEY (tag_id, question_id)
 );
 
 CREATE TABLE meta (
@@ -106,12 +106,12 @@ CREATE TABLE profile_meta (
     meta_id      INTEGER NOT NULL,
     profile_id   INTEGER NOT NULL,
 
-    UNIQUE (profile_id)
+    PRIMARY KEY (profile_id)
 );
 
 CREATE TABLE question_meta (
     meta_id       INTEGER NOT NULL,
     question_id   INTEGER NOT NULL,
 
-    UNIQUE (question_id)
+    PRIMARY KEY (question_id)
 );
