@@ -59,7 +59,7 @@ CREATE TABLE vote (
     updated       DATE NOT NULL,
 
     PRIMARY KEY (id),
-    UNIQUE (profile_id, question_id, option_id)
+    UNIQUE (profile_id, question_id, option_id, header)
 );
 
 CREATE TABLE tag (
