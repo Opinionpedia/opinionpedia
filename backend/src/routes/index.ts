@@ -1,5 +1,5 @@
 import bodyParser from 'body-parser';
-import express from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 
 import setupProfile from './profile.js';
 import setupQuestion from './question.js';
@@ -22,14 +22,18 @@ const allowedMethods = [
     'OPTIONS',
 ].join(', ');
 
-function log(req, res, next) {
+function log(req: Request, res: Response, next: NextFunction) {
     const { method, path } = req;
     console.log(`${method} ${path}`);
     next();
 }
 
-function cors(req, res, next) {
+function cors(req: Request, res: Response, next: NextFunction) {
     const origin = req.headers.origin;
+    if (origin === undefined) {
+        next();
+        return;
+    }
 
     if (origin in allowedOrigins) {
         res.set('Access-Control-Allow-Origin', origin);
@@ -42,7 +46,7 @@ function cors(req, res, next) {
     next();
 }
 
-function setupRoutes(router) {
+function setupRoutes(router: Router) {
     router.use(log);
     router.use(cors);
 

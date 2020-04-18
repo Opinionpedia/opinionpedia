@@ -4,12 +4,8 @@
 
 ```
 yarn install
-```
-
-then
-
-```
-node src
+yarn build
+yarn start
 ```
 
 ## How to run the tests
@@ -21,6 +17,8 @@ sh test.sh
 ```
 
 ## How to create a user and log in
+
+Here is an illustrative bash script that takes some typical actions:
 
 ```
 host=localhost:4000
@@ -37,7 +35,7 @@ body='{
     "body": "Body for profile ammc",
     "description": "Description for profile ammc"
 }'
-send_request
+send_request >/dev/null
 
 method=POST
 path=/api/login
@@ -50,23 +48,31 @@ token=$(send_request)
 echo Your authentication token is $token, please save it
 ```
 
+Although note that in the above example an authentication token is also sent
+when a profile is created, so you don't actually need to login immediately
+after creating a profile.
+
 ## List of available routes
 
 ### Profiles
 
 ```
 List     GET  http://localhost:4000/api/profile
+Details  GET  http://localhost:4000/api/profile/123
 Details  GET  http://localhost:4000/api/profile/pdm
 Create   POST http://localhost:4000/api/profile
 Modify   PUT  http://localhost:4000/api/profile
 Login    POST http://localhost:4000/api/login
 ```
 
+Note: For profiles, you can get the details for a profile by using either that
+profile's id or username.
+
 ### Questions
 
 ```
 List     GET  http://localhost:4000/api/question
-Details  GET  http://localhost:4000/api/question/2
+Details  GET  http://localhost:4000/api/question/123
 Create   POST http://localhost:4000/api/question
-Modify   PUT  http://localhost:4000/api/question/2
+Modify   PUT  http://localhost:4000/api/question/123
 ```

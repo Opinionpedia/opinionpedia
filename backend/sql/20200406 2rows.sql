@@ -1,6 +1,6 @@
 INSERT
     INTO profile
-    (username, password, salt, body, description, created, updated)
+    (username, password, salt, description, body, created, updated)
     VALUES
-    ('pdm', 'password', 'salt', 'Body for profile pdm',
-     'Description for profile pdm', '2020-03-31', '2020-03-31');
+    ('pdm', 'password', 'salt', 'Description for profile pdm',
+     'Body for profile pdm', '2020-03-31', '2020-03-31');

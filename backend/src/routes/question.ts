@@ -1,3 +1,5 @@
+import { Router } from 'express';
+
 import * as auth from '../auth.js';
 import { ERR_MYSQL_DUP_ENTRY, withConn } from '../db.js';
 
@@ -7,16 +9,19 @@ import * as question from '../models/question.js';
 // The endpoint are:
 //
 // List     GET  http://localhost:4000/api/question
-// Details  GET  http://localhost:4000/api/question/2
+// Details  GET  http://localhost:4000/api/question/123
 // Create   POST http://localhost:4000/api/question
-// Modify   PUT  http://localhost:4000/api/question/2
+// Modify   PUT  http://localhost:4000/api/question/123
 //
 
-export default (router) => {
+export default (router: Router) => {
     // Route method: GET
     // Route path: /question
     // Request URL: http://localhost:4000/api/question
     router.get('/', (req, res) => {
+        // TODO: Add pagination. Don't actually serve all questions in one
+        // request.
+
         withConn(res, async (conn) => {
             const questions = await question.getQuestions(conn);
 
@@ -26,20 +31,22 @@ export default (router) => {
 
     // Route method: GET
     // Route path: /question/:id
-    // Request URL: http://localhost:4000/api/question/2
+    // Request URL: http://localhost:4000/api/question/123
     //
     // req.params: {
-    //     "id": 2
+    //     "id": 123
     // }
     router.get('/:id', async (req, res) => {
         withConn(res, async (conn) => {
-            const { id } = req.params;
+            const { id: _id } = req.params;
 
-            const valid = question.isIdValid(id);
+            const valid = question.isIdValid(_id);
             if (!valid) {
                 res.status(400).send('Invalid request parameters');
                 return;
             }
+
+            const id = parseInt(_id);
 
             const q = await question.getQuestion(conn, id);
             if (q === null) {
@@ -62,15 +69,21 @@ export default (router) => {
     // }
     router.post('/', async (req, res) => {
         withConn(res, async (conn) => {
-            const { prompt, description } = req.body;
+            const {
+                prompt: _prompt,
+                description: _description
+            } = req.body;
 
             const valid =
-                question.isPromptValid(prompt) &&
-                question.isDescriptionValid(description);
+                question.isPromptValid(_prompt) &&
+                question.isDescriptionValid(_description);
             if (!valid) {
                 res.status(400).send('Invalid request parameters');
                 return;
             }
+
+            const prompt = _prompt as string;
+            const description = _description as string;
 
             const payload = await auth.verifyRequestJWT(req);
             if (payload === null) {
@@ -78,21 +91,21 @@ export default (router) => {
                 return;
             }
 
-            const { username } = payload;
+            const { profile_id } = payload;
 
-            const id = await question.createQuestion(conn, {
+            const questionId = await question.createQuestion(conn, {
+                profile_id,
                 prompt,
                 description,
-                profile_username: username,
             });
 
-            res.json({ id });
+            res.json({ id: questionId });
         });
     });
 
     // Route method: PUT
     // Route path: /question/:id
-    // Request URL: http://localhost:4000/api/question/2
+    // Request URL: http://localhost:4000/api/question/123
     //
     // req.headers.authorization: "Bearer a.b.c"
     // req.body: {
@@ -101,17 +114,22 @@ export default (router) => {
     // }
     router.put('/:id', async (req, res) => {
         withConn(res, async (conn) => {
-            const { id } = req.params;
-            const { prompt, description } = req.body;
+            const { id: _id } = req.params;
+            const { prompt: _prompt, description: _description } = req.body;
 
             const valid =
-                question.isIdValid(id) &&
-                (prompt === undefined || question.isPromptValid(prompt)) &&
-                (description === undefined || question.isDescriptionValid(description));
+                question.isIdValid(_id) &&
+                (_prompt === undefined || question.isPromptValid(_prompt)) &&
+                (_description === undefined ||
+                 question.isDescriptionValid(_description));
             if (!valid) {
                 res.status(400).send('Invalid request parameters');
                 return;
             }
+
+            const id = parseInt(_id);
+            const prompt = _prompt as string | undefined;
+            const description = _description as string | undefined;
 
             const payload = await auth.verifyRequestJWT(req);
             if (payload === null) {
@@ -119,16 +137,18 @@ export default (router) => {
                 return;
             }
 
-            const { username } = payload;
+            const { profile_id } = payload;
 
+            // Get existing question.
             const q = await question.getQuestion(conn, id);
             if (q === null) {
                 res.status(400).send('Invalid request parameters');
                 return;
             }
 
-            if (q.profile_username !== username) {
-                res.sendStatus(401);
+            // Apply changes from this PUT.
+            if (q.profile_id !== profile_id) {
+                res.sendStatus(403);
                 return;
             }
 

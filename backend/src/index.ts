@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 
 import setupApi from './routes/index.js';
 
@@ -22,7 +22,7 @@ const indexRoutes = [
     '/logout$',
     '/about$',
 ];
-function index(req, res) {
+function index(req: Request, res: Response) {
     res.sendFile('public/index.html', {
         root: process.cwd(),
     });
@@ -36,7 +36,7 @@ app.use(express.static('public'));
 //
 // Have a 404 page for all other situations.
 //
-function send404(req, res) {
+function send404(req: Request, res: Response) {
     res.sendFile('public/404.html', {
         root: process.cwd(),
     });

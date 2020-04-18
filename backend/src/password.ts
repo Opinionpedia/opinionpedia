@@ -1,11 +1,11 @@
 import crypto from 'crypto';
 
-export function isPasswordValid(value) {
+export function isPasswordValid(value: any): boolean {
     return typeof value === 'string' &&
-        value.length <= 128;
+           value.length <= 128;
 }
 
-function randomBytes(size) {
+function randomBytes(size: number): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         crypto.randomBytes(size, (err, buf) => {
             if (err) {
@@ -18,11 +18,25 @@ function randomBytes(size) {
     });
 }
 
-export function makeSalt() {
+export function makeSalt(): Promise<Buffer> {
     return randomBytes(16);
 }
 
-function pbkdf2({ password, salt, iterations, keylen, digest }) {
+interface Pbkdf2Params {
+    password: string;
+    salt: Buffer,
+    iterations: number;
+    keylen: number;
+    digest: string;
+}
+
+function pbkdf2({
+    password,
+    salt,
+    iterations,
+    keylen,
+    digest,
+}: Pbkdf2Params): Promise<Buffer> {
     return new Promise((resolve, reject) => {
         crypto.pbkdf2(password, salt, iterations, keylen, digest,
                       (err, derivedKey) => {
@@ -36,7 +50,10 @@ function pbkdf2({ password, salt, iterations, keylen, digest }) {
     });
 }
 
-export function hashPassword(password, salt) {
+export function hashPassword(
+    password: string,
+    salt: Buffer,
+): Promise<Buffer> {
     return pbkdf2({
         password,
         salt,
