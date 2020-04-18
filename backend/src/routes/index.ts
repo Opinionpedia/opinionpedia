@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response, Router } from 'express';
 
 import setupProfile from './profile.js';
 import setupQuestion from './question.js';
+import setupOption from './option.js';
 
 const allowedOrigins = {
     'http://localhost:3000': true,
@@ -56,13 +57,16 @@ function setupRoutes(router: Router) {
     const profile = express.Router();
     const login = express.Router();
     const question = express.Router();
+    const option = express.Router();
 
     router.use('/profile', profile);
     router.use('/login', login);
     router.use('/question', question);
+    router.use('/option', option);
 
     setupProfile({ profile, login });
     setupQuestion(question);
+    setupOption(option);
 }
 
 export default setupRoutes;

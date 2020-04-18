@@ -16,6 +16,9 @@ With the backend running, do:
 sh test.sh
 ```
 
+The test script hard codes some things and works best if it is run on a clean,
+just-started instance of the server. It could be improved.
+
 ## How to create a user and log in
 
 Here is an illustrative bash script that takes some typical actions:
@@ -75,4 +78,14 @@ List     GET  http://localhost:4000/api/question
 Details  GET  http://localhost:4000/api/question/123
 Create   POST http://localhost:4000/api/question
 Modify   PUT  http://localhost:4000/api/question/123
+```
+
+### Options
+
+```
+List     GET  http://localhost:4000/api/option
+List     GET  http://localhost:4000/api/option/question/123
+Details  GET  http://localhost:4000/api/option/456
+Create   POST http://localhost:4000/api/option
+Modify   PUT  http://localhost:4000/api/option/456
 ```

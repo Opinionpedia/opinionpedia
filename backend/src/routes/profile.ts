@@ -244,16 +244,18 @@ export default (routers: { profile: Router, login: Router }) => {
             const username = _username as string;
             const password = _password as string;
 
+            // Get existing profile.
             const p = await profile.getProfileByUsername(conn, username);
 
             if (p === null) {
-                res.status(400).send('User does not exist');
+                res.status(400).send('Profile does not exist');
                 return;
             }
 
             const salt = Buffer.from(p.salt, 'hex');
             const hash = await hashPassword(password, salt);
 
+            // Apply changes from this PUT.
             if (p.password !== hash.toString('hex')) {
                 res.status(400).send('Incorrect password');
                 return;

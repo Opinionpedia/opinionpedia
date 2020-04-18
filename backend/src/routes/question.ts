@@ -108,6 +108,9 @@ export default (router: Router) => {
     // Request URL: http://localhost:4000/api/question/123
     //
     // req.headers.authorization: "Bearer a.b.c"
+    // req.params: {
+    //     "id": 123
+    // }
     // req.body: {
     //     "prompt": "my new prompt",
     //     "description": "my new description"
@@ -146,12 +149,12 @@ export default (router: Router) => {
                 return;
             }
 
-            // Apply changes from this PUT.
             if (q.profile_id !== profile_id) {
                 res.sendStatus(403);
                 return;
             }
 
+            // Apply changes from this PUT.
             if (prompt !== undefined) {
                 q.prompt = prompt;
             }
