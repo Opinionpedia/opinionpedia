@@ -61,5 +61,6 @@ curl -X PUT -H 'Content-Type: application/json' -H "Authorization: Bearer $token
     }' $api/question/1
 echo
 
+echo GET /question/1
 curl $api/question/1
 echo
