@@ -48,7 +48,7 @@ export function isUsernameValid(value: any): boolean {
     return !isNum;
 }
 
-// Note: function isPasswordValid can be found in password.js
+export { isPasswordValid } from '../password.js';
 
 export function isBodyValid(value: any): boolean {
     return isVarchar(value, 0, 10000);

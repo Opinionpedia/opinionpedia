@@ -102,7 +102,7 @@ export default (routers: { profile: Router, login: Router }) => {
 
             const valid =
                 profile.isUsernameValid(_username) &&
-                password.isPasswordValid(_pw) &&
+                profile.isPasswordValid(_pw) &&
                 profile.isDescriptionValid(_description) &&
                 profile.isBodyValid(_body);
             if (!valid) {
@@ -166,7 +166,7 @@ export default (routers: { profile: Router, login: Router }) => {
             const valid =
                 (_username === undefined ||
                  profile.isUsernameValid(_username)) &&
-                (_pw === undefined || password.isPasswordValid(_pw)) &&
+                (_pw === undefined || profile.isPasswordValid(_pw)) &&
                 (_description === undefined ||
                  profile.isDescriptionValid(_description)) &&
                 (_body === undefined || profile.isBodyValid(_body));
@@ -234,7 +234,7 @@ export default (routers: { profile: Router, login: Router }) => {
 
             const invalid =
                 !profile.isUsernameValid(_username) ||
-                !password.isPasswordValid(_pw);
+                !profile.isPasswordValid(_pw);
             if (invalid) {
                 res.status(400).send('Invalid request parameters');
                 return;
