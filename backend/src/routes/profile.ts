@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import * as auth from '../auth.js';
 import { ERR_MYSQL_DUP_ENTRY, withConn } from '../db.js';
-import * as password from '../password.js';
+import { hashPassword, makeSalt } from '../password.js';
 
 import * as profile from '../models/profile.js';
 
@@ -95,14 +95,14 @@ export default (routers: { profile: Router, login: Router }) => {
         withConn(res, async (conn) => {
             const {
                 username: _username,
-                password: _pw,
+                password: _password,
                 description: _description,
                 body: _body,
             } = req.body;
 
             const valid =
                 profile.isUsernameValid(_username) &&
-                profile.isPasswordValid(_pw) &&
+                profile.isPasswordValid(_password) &&
                 profile.isDescriptionValid(_description) &&
                 profile.isBodyValid(_body);
             if (!valid) {
@@ -111,12 +111,12 @@ export default (routers: { profile: Router, login: Router }) => {
             }
 
             const username = _username as string;
-            const pw = _pw as string;
+            const password = _password as string;
             const description = _description as string;
             const body = _body as string;
 
-            const salt = await password.makeSalt();
-            const hash = await password.hashPassword(pw, salt);
+            const salt = await makeSalt();
+            const hash = await hashPassword(password, salt);
 
             let id;
             try {
@@ -158,7 +158,7 @@ export default (routers: { profile: Router, login: Router }) => {
         withConn(res, async (conn) => {
             const {
                 username: _username,
-                password: _pw,
+                password: _password,
                 description: _description,
                 body: _body,
             } = req.body;
@@ -166,7 +166,8 @@ export default (routers: { profile: Router, login: Router }) => {
             const valid =
                 (_username === undefined ||
                  profile.isUsernameValid(_username)) &&
-                (_pw === undefined || profile.isPasswordValid(_pw)) &&
+                (_password === undefined ||
+                 profile.isPasswordValid(_password)) &&
                 (_description === undefined ||
                  profile.isDescriptionValid(_description)) &&
                 (_body === undefined || profile.isBodyValid(_body));
@@ -176,7 +177,7 @@ export default (routers: { profile: Router, login: Router }) => {
             }
 
             const username = _username as string | undefined;
-            const pw = _pw as string | undefined;
+            const password = _password as string | undefined;
             const description = _description as string | undefined;
             const body = _body as string | undefined;
 
@@ -200,9 +201,9 @@ export default (routers: { profile: Router, login: Router }) => {
                 p.username = username;
             }
 
-            if (pw !== undefined) {
+            if (password !== undefined) {
                 const salt = Buffer.from(p.salt, 'hex');
-                const hash = await password.hashPassword(pw, salt);
+                const hash = await hashPassword(password, salt);
                 p.password = hash.toString('hex');
             }
 
@@ -230,18 +231,18 @@ export default (routers: { profile: Router, login: Router }) => {
     // }
     routers.login.post('/', async (req, res) => {
         withConn(res, async (conn) => {
-            const { username: _username, password: _pw } = req.body;
+            const { username: _username, password: _password } = req.body;
 
             const invalid =
                 !profile.isUsernameValid(_username) ||
-                !profile.isPasswordValid(_pw);
+                !profile.isPasswordValid(_password);
             if (invalid) {
                 res.status(400).send('Invalid request parameters');
                 return;
             }
 
             const username = _username as string;
-            const pw = _pw as string;
+            const password = _password as string;
 
             const p = await profile.getProfileByUsername(conn, username);
 
@@ -251,7 +252,7 @@ export default (routers: { profile: Router, login: Router }) => {
             }
 
             const salt = Buffer.from(p.salt, 'hex');
-            const hash = await password.hashPassword(pw, salt);
+            const hash = await hashPassword(password, salt);
 
             if (p.password !== hash.toString('hex')) {
                 res.status(400).send('Incorrect password');
