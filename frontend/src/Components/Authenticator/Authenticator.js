@@ -43,6 +43,7 @@ class Authenticator extends React.Component {
   }
 
   async handleClick() {
+    console.log(process)
     console.log(this.state.username)
     var obj = {
       username: this.state.username,
@@ -50,11 +51,12 @@ class Authenticator extends React.Component {
       body: "Body for profile " +  this.state.username,
       description: "Description for profile " + this.state.username
     };
-    const response = await fetch('http://localhost:4000/api/profile', {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_API}/api/profile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      json:true,
       body: JSON.stringify(obj)
     });
     return response.json();

@@ -36,13 +36,19 @@ function cors(req: Request, res: Response, next: NextFunction) {
         return;
     }
 
+    /*
     if (origin in allowedOrigins) {
         res.set('Access-Control-Allow-Origin', origin);
         res.vary('Origin');
     }
+    */
+    res.set('Access-Control-Allow-Origin', '*');
+    
 
     res.set('Access-Control-Allow-Headers', allowedHeaders);
     res.set('Access-Control-Allow-Methods', allowedMethods);
+    
+    
 
     next();
 }
