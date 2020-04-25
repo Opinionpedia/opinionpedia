@@ -3,6 +3,7 @@ import './App.css';
 import Home from '../Home/Home';
 import Authenticator from '../Authenticator/Authenticator';
 import Login from '../Login/Login';
+import Profile from '../Profile/Profile';
 import 'normalize.css/normalize.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -45,6 +46,10 @@ export default function App() {
         </Navbar>
         <Navbar>
           <Navbar.Group>
+          <Link to="/profile">
+              <Button to="/signup" className="bp3-minimal" text="Profile" />
+            </Link>
+            <Navbar.Divider/>
             <Icon icon="key" />
             <Navbar.Divider />
             <Link to="/signup">
@@ -67,6 +72,9 @@ export default function App() {
           </Route>
           <Route path="/login">
             <Login />
+          </Route>
+          <Route path="/profile">
+            <Profile />
           </Route>
           <Route path="/">
             <Home />

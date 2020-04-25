@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useState } from "react";
+import fetch from "cross-fetch";
+import "../Authenticator/Authenticator.css";
 import "normalize.css/normalize.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import "@blueprintjs/core/lib/css/blueprint.css";
@@ -28,38 +29,41 @@ const Authenticator = (props) => {
   const [password, setPassword] = useState("");
   const [confPassword, setConfPassword] = useState("");
   const [visibility, setVisible] = useState(true);
-  
+
   const register = async () => {
     const user = {
-      username,
-      password,
+      username: username,
+      password: password,
       body: `Body for profile ${username}`,
       description: `Description for profile ${username}`,
     };
 
-   /* const response = await fetch(`${API_ENDPOINT}/api/profile`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    });
-
-    const body = await response.json();
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_API}/api/profile`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        json: true,
+        body: JSON.stringify(user),
+      }
+    );
+    return response.json();
     //do something
-  };*/};
-    const handleChangeUsername =event =>{
-      setUsername(event.target.value);
-   };
-     const handleChangePassword =event =>{
-      setPassword(event.target.value);
-    };
-     const handleChangeConfPassword =event =>{
-      setConfPassword(event.target.value);
-    };
-    const handleClose =()=>{
-        setVisible(false);
-    };
+  };
+  const handleChangeUsername = (event) => {
+    setUsername(event.target.value);
+  };
+  const handleChangePassword = (event) => {
+    setPassword(event.target.value);
+  };
+  const handleChangeConfPassword = (event) => {
+    setConfPassword(event.target.value);
+  };
+  const handleClose = () => {
+    setVisible(false);
+  };
   return (
     <Overlay
       isOpen={visibility}
@@ -68,16 +72,7 @@ const Authenticator = (props) => {
       canOutsideClickClose={true}
       autoFocus={true}
     >
-      <Card
-        className=""
-        style={{
-          maxWidth: "500px",
-          width: "260px",
-          marginTop: "20vh",
-          marginLeft: "-130px",
-          left: "50%",
-        }}
-      >
+      <Card className="Sign-card">
         <FormGroup
           helperText="Never pay anything"
           label="Sign Up"
@@ -85,26 +80,18 @@ const Authenticator = (props) => {
           labelInfo="(required)"
         >
           <InputGroup
-          style={{ 
-            marginTop:"10px"
-            }}
             id="text-input"
             placeholder="Username"
             value={username}
             onChange={handleChangeUsername}
           />
           <InputGroup
-          style={{ 
-            marginTop:"10px",
-            marginBottom:"10px"
-            }}
             id="text-input"
             placeholder="Password"
             value={password}
             onChange={handleChangePassword}
           />
           <InputGroup
-         
             id="text-input"
             placeholder="Confirm Password"
             value={confPassword}
