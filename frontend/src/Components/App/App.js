@@ -2,7 +2,8 @@ import React from 'react';
 import './App.css';
 import Home from '../Home/Home';
 import Authenticator from '../Authenticator/Authenticator';
-
+import Login from '../Login/Login';
+import Profile from '../Profile/Profile';
 import 'normalize.css/normalize.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -13,7 +14,8 @@ import { Button,
          FormGroup,
          InputGroup,
          Icon,
-         Card 
+         Card,
+         Overlay,
 } from "@blueprintjs/core";
 
 import {
@@ -44,6 +46,10 @@ export default function App() {
         </Navbar>
         <Navbar>
           <Navbar.Group>
+          <Link to="/profile">
+              <Button to="/signup" className="bp3-minimal" text="Profile" />
+            </Link>
+            <Navbar.Divider/>
             <Icon icon="key" />
             <Navbar.Divider />
             <Link to="/signup">
@@ -64,9 +70,17 @@ export default function App() {
           <Route path="/signup">
             <Authenticator />
           </Route>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/profile">
+            <Profile />
+          </Route>
           <Route path="/">
             <Home />
+            
           </Route>
+          
         </Switch>
       </div>
     </Router>
@@ -76,6 +90,7 @@ export default function App() {
 function About() {
   return <h2>About</h2>;
 }
+
 
 function Topics() {
   let match = useRouteMatch();
@@ -110,6 +125,7 @@ function Topics() {
     </div>
   );
 }
+
 
 function Topic() {
   let { topicId } = useParams();
