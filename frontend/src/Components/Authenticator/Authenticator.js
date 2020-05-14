@@ -50,7 +50,6 @@ const Authenticator = (props) => {
       }
     );
     return response.json();
-    //do something
   };
   const handleChangeUsername = (event) => {
     setUsername(event.target.value);
