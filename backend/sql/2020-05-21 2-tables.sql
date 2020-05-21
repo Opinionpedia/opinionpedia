@@ -7,8 +7,8 @@ CREATE TABLE profile (
     description   TEXT NOT NULL,
     body          TEXT NOT NULL,
 
-    created       DATE NOT NULL,
-    updated       DATE NOT NULL,
+    created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE (username)
@@ -22,8 +22,8 @@ CREATE TABLE question (
     prompt        TEXT NOT NULL,
     description   TEXT NOT NULL,
 
-    created       DATE NOT NULL,
-    updated       DATE NOT NULL,
+    created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id)
 );
@@ -37,8 +37,8 @@ CREATE TABLE option_ (
     prompt        TEXT NOT NULL,
     description   TEXT,
 
-    created       DATE NOT NULL,
-    updated       DATE NOT NULL,
+    created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id)
 );
@@ -55,8 +55,8 @@ CREATE TABLE vote (
     description   TEXT,
     active        INTEGER NOT NULL,
 
-    created       DATE NOT NULL,
-    updated       DATE NOT NULL,
+    created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE (profile_id, question_id, option_id, header)
@@ -70,8 +70,8 @@ CREATE TABLE tag (
     name          VARCHAR(100) NOT NULL,
     description   TEXT NOT NULL,
 
-    created       DATE NOT NULL,
-    updated       DATE NOT NULL,
+    created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE (name)
@@ -96,8 +96,8 @@ CREATE TABLE meta (
 
     views     INTEGER NOT NULL,
 
-    created   DATE NOT NULL,
-    updated   DATE NOT NULL,
+    created   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id)
 );
