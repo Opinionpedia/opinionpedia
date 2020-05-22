@@ -6,6 +6,7 @@
         ],
         "module": "ESNext",
         "moduleResolution": "Node",
+        "outDir": "build",
         "skipLibCheck": true,
         "strict": true,
         "target": "ESNext"
