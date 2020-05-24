@@ -32,16 +32,19 @@ export interface UpdateQuestion {
     description: string;
 }
 
+const MAXIMUM_PROMPT_LENGTH = 3000;
+const MAXIMUM_DESCRIPTION_LENGTH = 10000;
+
 export function isIdValid(value: any): boolean {
     return isId(value);
 }
 
 export function isPromptValid(value: any): boolean {
-    return isVarchar(value, 0, 3000);
+    return isVarchar(value, 0, MAXIMUM_PROMPT_LENGTH);
 }
 
 export function isDescriptionValid(value: any): boolean {
-    return isVarchar(value, 0, 10000);
+    return isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getQuestions(conn: Conn): Promise<Question[]> {
