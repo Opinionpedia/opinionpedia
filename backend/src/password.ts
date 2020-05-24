@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 
+//https://api.pwnedpasswords.com/range/ce0b2
+
 export function isPasswordValid(value: any): boolean {
     return typeof value === 'string' &&
            value.length <= 128;
