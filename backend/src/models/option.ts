@@ -35,16 +35,19 @@ export interface UpdateOption {
     description: string | null;
 }
 
+const MAXIMUM_PROMPT_LENGTH = 1000;
+const MAXIMUM_DESCRIPTION_LENGTH = 3000;
+
 export function isIdValid(value: any) {
     return isId(value);
 }
 
 export function isPromptValid(value: any) {
-    return isVarchar(value, 0, 1000);
+    return isVarchar(value, 0, MAXIMUM_PROMPT_LENGTH);
 }
 
 export function isDescriptionValid(value: any) {
-    return value === null || isVarchar(value, 0, 3000);
+    return value === null || isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getOptions(conn: Conn): Promise<Option[]> {
