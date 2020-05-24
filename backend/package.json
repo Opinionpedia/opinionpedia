@@ -1,6 +1,4 @@
 {
-    "license": "GPL-3.0-only",
-    "type": "module",
     "dependencies": {
         "@types/express": "^4.17.6",
         "@types/jsonwebtoken": "^8.3.9",
@@ -12,9 +10,11 @@
         "sql-template-strings": "^2.2.2",
         "typescript": "^3.8.3"
     },
+    "license": "GPL-3.0-only",
     "scripts": {
         "build": "tsc",
         "watch": "tsc -w",
-        "start": "node -r dotenv/config build"
-    }
+        "start": "node --experimental-modules -r dotenv/config build"
+    },
+    "type": "module"
 }
