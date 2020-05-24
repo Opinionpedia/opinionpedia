@@ -34,12 +34,16 @@ export interface UpdateProfile {
     body: string;
 }
 
+const MAXIMUM_USERNAME_LENGTH = 300;
+const MAXIMUM_BODY_LENGTH = 10000;
+const MAXIMUM_DESCRIPTION_LENGTH = 3000;
+
 export function isIdValid(value: any): boolean {
     return isId(value);
 }
 
 export function isUsernameValid(value: any): boolean {
-    if (!isVarchar(value, 1, 300)) {
+    if (!isVarchar(value, 1, MAXIMUM_USERNAME_LENGTH)) {
         return false;
     }
 
@@ -51,11 +55,11 @@ export function isUsernameValid(value: any): boolean {
 export { isPasswordValid } from '../password.js';
 
 export function isBodyValid(value: any): boolean {
-    return isVarchar(value, 0, 10000);
+    return isVarchar(value, 0, MAXIMUM_BODY_LENGTH);
 }
 
 export function isDescriptionValid(value: any): boolean {
-    return isVarchar(value, 0, 3000);
+    return isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getProfiles(conn: Conn): Promise<Profile[]> {
