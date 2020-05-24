@@ -1,6 +1,8 @@
 import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 
+const JWT_EXPIRATION_TIME = '1 hour';
+
 // FIXME: Change to environment variable / use secret store.
 const secret: jwt.Secret = 'secret';
 
@@ -90,7 +92,7 @@ export function signJWT(token: Token): Promise<string> {
         sub: profile_id,
     };
     const options: jwt.SignOptions = {
-        expiresIn: '1 hour',
+        expiresIn: JWT_EXPIRATION_TIME,
     };
 
     // We assume this doesn't throw.
