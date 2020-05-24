@@ -1,5 +1,10 @@
 # Backend
 
+## Pre-requisites
+
+- Node.js 12.x
+- Yarn 1.x
+
 ## How to install and run
 
 ```
