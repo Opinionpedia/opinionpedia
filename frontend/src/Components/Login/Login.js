@@ -37,6 +37,7 @@ const Login = (props) => {
   const handleClose = () => {
     setVisible(false);
   };
+
   return (
     <div>
       <Overlay
@@ -54,10 +55,6 @@ const Login = (props) => {
             labelInfo=""
           >
             <InputGroup
-              style={{
-                marginTop: "10px",
-                marginBottom: "10px",
-              }}
               id="text-input"
               placeholder="Username"
               value={username}

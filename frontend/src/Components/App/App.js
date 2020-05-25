@@ -4,6 +4,8 @@ import Home from '../Home/Home';
 import Authenticator from '../Authenticator/Authenticator';
 import Login from '../Login/Login';
 import Profile from '../Profile/Profile';
+import NewsFeed from '../Newsfeed/Newsfeed';
+import QuestionSubmit from '../Questionsubmit/Questionsubmit'
 import 'normalize.css/normalize.css';
 import '@blueprintjs/icons/lib/css/blueprint-icons.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -42,12 +44,19 @@ export default function App() {
             <Link to="/about">
               <Button to="/about" className="bp3-minimal" icon="document" text="About Us" />
             </Link>
+            <Link to="/news">
+              <Button className="bp3-minimal"  text="News" />
+            </Link>
           </Navbar.Group>
         </Navbar>
         <Navbar>
           <Navbar.Group>
           <Link to="/profile">
-              <Button to="/signup" className="bp3-minimal" text="Profile" />
+              <Button to="/signup" className="bp3-minimal" icon="user" text="Profile" />
+            </Link>
+            <Navbar.Divider/>
+            <Link to="/create">
+              <Button to="/signup" className="bp3-minimal" text="New Question" icon="new-drawing"/>
             </Link>
             <Navbar.Divider/>
             <Icon icon="key" />
@@ -75,6 +84,12 @@ export default function App() {
           </Route>
           <Route path="/profile">
             <Profile />
+          </Route>
+          <Route path="/news">
+            <NewsFeed />
+          </Route>
+          <Route path="/create">
+            <QuestionSubmit />
           </Route>
           <Route path="/">
             <Home />
