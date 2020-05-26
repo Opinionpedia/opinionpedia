@@ -63,17 +63,6 @@ Next steps:
 
 
 
-Deployment
-----------
-
-- Make sure the sources are built with `yarn build`.
-- Set environment variables appropriate for the deployment environment, or use
-  the `.env` file.
-- Set `JWT_SECRET` to a string of random bytes.
-- Run the server in production mode with `yarn start-prod`.
-
-
-
 Try creating a profile and logging in
 -------------------------------------
 
@@ -110,6 +99,17 @@ send_request
 
 echo 'Your authentication token should be displayed (twice), please save it'
 ```
+
+
+
+Deployment
+==========
+
+- Make sure the sources are built with `yarn build`.
+- Set environment variables appropriate for the deployment environment, or use
+  the `.env` file.
+- Set `JWT_SECRET` to a string of random bytes.
+- Run the server in production mode with `yarn start-prod`.
 
 
 
