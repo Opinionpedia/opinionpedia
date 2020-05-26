@@ -121,7 +121,7 @@ Table of contents
 -----------------
 
 - Profiles
-  - [List profile](#list-profiles)
+  - [List profiles](#list-profiles)
   - [Detail profile](#detail-profile)
   - [Create profile](#create-profile)
   - [Modify profile](#modify-profile)
