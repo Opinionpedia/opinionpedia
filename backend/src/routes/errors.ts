@@ -95,7 +95,7 @@ export class MissingAuthenticationError extends HTTP403ForbiddenError {
 
 export class NotOwnerError extends HTTP403ForbiddenError {
     constructor() {
-        super('You own own that');
+        super('You don\'t own that');
     }
 }
 
