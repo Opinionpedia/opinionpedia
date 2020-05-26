@@ -1,8 +1,10 @@
-import { Response } from 'express';
 import { promises as fs } from 'fs';
 import mysql from 'mysql';
 import { performance } from 'perf_hooks';
-import { SQLStatement } from 'sql-template-strings';
+import SQL, { SQLStatement } from 'sql-template-strings';
+
+import { production } from './config.js';
+import { MySQLError, MySQLDriverError } from './errors.js';
 
 if (process.env.DB_USER === undefined ||
     process.env.DB_DATABASE === undefined ||
@@ -105,7 +107,7 @@ class PromisifiedMySQLConnection {
         return new Promise((resolve, reject) => {
             this.connection.connect((err) => {
                 if (err) {
-                    reject(err);
+                    reject(new MySQLDriverError(err));
                     return;
                 }
 
@@ -118,7 +120,7 @@ class PromisifiedMySQLConnection {
         return new Promise((resolve, reject) => {
             this.connection.query(options, (err, results, fields) => {
                 if (err) {
-                    reject(err);
+                    reject(new MySQLDriverError(err));
                     return;
                 }
 
@@ -131,7 +133,7 @@ class PromisifiedMySQLConnection {
         return new Promise((resolve, reject) => {
             this.connection.end((err) => {
                 if (err) {
-                    reject(err);
+                    reject(new MySQLDriverError(err));
                     return;
                 }
 
@@ -150,7 +152,8 @@ export class Conn {
     constructor() {
         const connection = new PromisifiedMySQLConnection(config);
 
-        // We have to register an error handler or else bad things will happen.
+        // We have to register an error handler or else the mysql driver will
+        // get angry at us.
         connection.on('error', console.error);
 
         this.connection = connection;
@@ -167,14 +170,16 @@ export class Conn {
 
         const measure = new Measure();
 
-        const { results, fields } = await connection.query(options);
+        try {
+            const { results, fields } = await connection.query(options);
 
-        const timeTaken = measure.end().toFixed(1);
-        const query = stringify(options);
+            return { results, fields };
+        } finally {
+            const timeTaken = measure.end().toFixed(1);
+            const query = stringify(options);
 
-        console.log(`[${timeTaken}ms] ${query}`);
-
-        return { results, fields };
+            console.log(`[${timeTaken}ms] ${query}`);
+        }
     }
 
     async end(): Promise<void> {
@@ -187,89 +192,90 @@ export class Conn {
 
     private getConnection(): PromisifiedMySQLConnection {
         if (this.connection === null) {
-            throw new Error('Used a closed MySQL connection');
+            throw new MySQLError('Used a closed MySQL connection');
         } else {
             return this.connection;
         }
     }
 }
 
-/**
- * Safely create a database connection and invoke a function, passing the
- * connection as an argument.
- */
-export async function withConn(
-    res: Response,
-    fn: (conn: Conn) => Promise<void>
-): Promise<void> {
-    // Create connection.
-    const conn = new Conn();
+async function runSQLFile(conn: Conn, path: string): Promise<void> {
+    // How to run .sql files quickly if they're large:
+    //   Execute `mysql -h host -u user databasename < file.sql`.
 
-    try {
-        await conn.connect();
-    } catch (err) {
-        console.error(err);
-        res.sendStatus(500);
-        // Do not continue.
+    const content = await fs.readFile(path, 'utf-8');
+
+    // `content` is logged.
+    await conn.query(content);
+}
+
+let initialized = false;
+async function createMigrationsTable(conn: Conn): Promise<void> {
+    // Only run once.
+    if (initialized) {
         return;
     }
+    initialized = true;
 
-    // Execute function.
-    try {
-        await fn(conn);
-    } catch (err) {
-        console.error(err);
-        res.sendStatus(500);
-        // Continue.
+    const stmt = SQL`CREATE TABLE IF NOT EXISTS migrations (path VARCHAR(256))`;
+
+    await conn.query(stmt);
+}
+
+async function hasMigrationRun(conn: Conn, path: string): Promise<boolean> {
+    const stmt = SQL`
+        SELECT 1 FROM migrations
+        WHERE path = ${path} LIMIT 1`;
+    const { results } = await conn.query(stmt);
+
+    // Check if the result is found or not.
+    return !!results.length;
+}
+
+async function markMigrationDone(conn: Conn, path: string): Promise<void> {
+    const stmt = SQL`
+        INSERT INTO migrations (path)
+        VALUES (${path})`;
+    await conn.query(stmt);
+}
+
+async function migrateOne(conn: Conn, path: string): Promise<void> {
+    // Development runs should have a reliable, clean environment. Run all
+    // migrations every time.
+    //
+    // Production runs should leave existing data in-tact. Only run migrations
+    // if they're new.
+
+    if (process.env.NODE_ENV === 'production') {
+        await createMigrationsTable(conn);
+
+        if (await hasMigrationRun(conn, path)) {
+            return;
+        }
+
+        await markMigrationDone(conn, path);
     }
 
-    // End connection.
-    try {
-        await conn.end();
-    } catch (err) {
-        console.error(err);
-    }
+    await runSQLFile(conn, path);
 }
 
 /**
  * Create a database connection and run the scripts in the top-level 'sql'
  * folder.
  */
-async function migrate(): Promise<void> {
+export async function runMigrations(): Promise<void> {
     const conn = new Conn();
     await conn.connect();
 
-    let files = await fs.readdir('./sql/');
-    files.sort();
-    files = files.map((file) => `./sql/${file}`);
+    const list = `./sql/${production ? 'production' : 'development'}.json`;
+    const files = JSON.parse(await fs.readFile(list, 'utf-8')) as string[];
+    const paths = files.map((file) => `./sql/${file}`);
 
-    for (const file of files) {
-        if (file.endsWith('.sql')) {
-            console.log(`Applying ${file}:`);
+    for (const path of paths) {
+        console.log(`Applying ${path}:`);
 
-            const buffer = await fs.readFile(file);
-            const content = buffer.toString('utf-8');
-
-            // `content` is logged.
-            await conn.query(content);
-        }
+        await migrateOne(conn, path);
     }
+
     await conn.end();
 }
-
-async function migrateAtBoot(): Promise<void> {
-    try {
-        await migrate();
-    } catch (err) {
-        console.error(err);
-        process.exit(1);
-    }
-
-    console.log('Finished setting up database');
-}
-
-// TODO: Create a static Conn factory method that awaits on migrateAtBoot() to
-//       finish before constructing a Conn. This will allow clients to make
-//       requests to the server before it is ready, and they will be kept on
-//       pause until everything is up.
-migrateAtBoot();

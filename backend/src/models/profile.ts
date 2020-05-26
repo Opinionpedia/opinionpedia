@@ -1,8 +1,12 @@
 import SQL from 'sql-template-strings';
 
-import { CURRENT_DATE, SQLDate, isId, isVarchar } from './util.js';
+import { SQLDate, isId, isVarchar } from './util.js';
 
 import { Conn } from '../db.js';
+
+const MAXIMUM_USERNAME_LENGTH = 300;
+const MAXIMUM_BODY_LENGTH = 10000;
+const MAXIMUM_DESCRIPTION_LENGTH = 3000;
 
 export interface Profile {
     id: number;
@@ -10,8 +14,8 @@ export interface Profile {
     username: string;
     password: string;
     salt: string;
-    description: string;
-    body: string;
+    description: string | null;
+    body: string | null;
 
     created: SQLDate;
     updated: SQLDate;
@@ -21,8 +25,8 @@ export interface CreateProfile {
     username: string;
     password: string;
     salt: string;
-    description: string;
-    body: string;
+    description: string | null;
+    body: string | null;
 }
 
 export interface UpdateProfile {
@@ -30,13 +34,9 @@ export interface UpdateProfile {
 
     username: string;
     password: string;
-    description: string;
-    body: string;
+    description: string | null;
+    body: string | null;
 }
-
-const MAXIMUM_USERNAME_LENGTH = 300;
-const MAXIMUM_BODY_LENGTH = 10000;
-const MAXIMUM_DESCRIPTION_LENGTH = 3000;
 
 export function isIdValid(value: any): boolean {
     return isId(value);
@@ -55,11 +55,11 @@ export function isUsernameValid(value: any): boolean {
 export { isPasswordValid } from '../password.js';
 
 export function isBodyValid(value: any): boolean {
-    return isVarchar(value, 0, MAXIMUM_BODY_LENGTH);
+    return value === null || isVarchar(value, 0, MAXIMUM_BODY_LENGTH);
 }
 
 export function isDescriptionValid(value: any): boolean {
-    return isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
+    return value === null || isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getProfiles(conn: Conn): Promise<Profile[]> {
@@ -114,16 +114,9 @@ export async function createProfile(
         body,
     } = profile;
 
-    const created = CURRENT_DATE;
-    const updated = CURRENT_DATE;
-
     const stmt = SQL`
-        INSERT INTO profile
-        (username, password, salt, description, body,
-         created, updated)
-        VALUES
-        (${username}, ${password}, ${salt}, ${description}, ${body},
-         ${created}, ${updated})`;
+        INSERT INTO profile (username, password, salt, description, body)
+        VALUES (${username}, ${password}, ${salt}, ${description}, ${body})`;
 
     const { results } = await conn.query(stmt);
 
@@ -144,15 +137,12 @@ export async function updateProfile(
         body,
     } = profile;
 
-    const updated = CURRENT_DATE;
-
     const stmt = SQL`
         UPDATE profile
         SET username = ${username},
             password = ${password},
             description = ${description},
             body = ${body},
-            updated = ${updated}
         WHERE id = ${id}`;
 
     await conn.query(stmt);

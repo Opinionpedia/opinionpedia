@@ -4,8 +4,9 @@ CREATE TABLE profile (
     username      VARCHAR(300) NOT NULL,
     password      CHAR(128) NOT NULL,
     salt          CHAR(32) NOT NULL,
-    description   TEXT NOT NULL,
-    body          TEXT NOT NULL,
+
+    description   TEXT,
+    body          TEXT,
 
     created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -50,9 +51,15 @@ CREATE TABLE vote (
     question_id   INTEGER NOT NULL,
     option_id     INTEGER NOT NULL,
 
+    -- Not used in multiple-choice questions.
     header        INTEGER,
     body          TEXT,
     description   TEXT,
+
+    -- ammc @ May 14th, 2020:
+    --   1=show normally
+    --   0=desirable
+    --   high numbers like 2 could be something like 2=promote (content)
     active        INTEGER NOT NULL,
 
     created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +75,7 @@ CREATE TABLE tag (
     profile_id    INTEGER NOT NULL,
 
     name          VARCHAR(100) NOT NULL,
-    description   TEXT NOT NULL,
+    description   TEXT,
 
     created       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -89,29 +96,4 @@ CREATE TABLE question_tag (
     question_id   INTEGER NOT NULL,
 
     PRIMARY KEY (tag_id, question_id)
-);
-
-CREATE TABLE meta (
-    id        INTEGER NOT NULL AUTO_INCREMENT,
-
-    views     INTEGER NOT NULL,
-
-    created   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    PRIMARY KEY (id)
-);
-
-CREATE TABLE profile_meta (
-    meta_id      INTEGER NOT NULL,
-    profile_id   INTEGER NOT NULL,
-
-    PRIMARY KEY (profile_id)
-);
-
-CREATE TABLE question_meta (
-    meta_id       INTEGER NOT NULL,
-    question_id   INTEGER NOT NULL,
-
-    PRIMARY KEY (question_id)
 );

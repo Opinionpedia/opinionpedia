@@ -1,171 +1,139 @@
-import { Router } from 'express';
-
-import * as auth from '../auth.js';
-import { ERR_MYSQL_DUP_ENTRY, withConn } from '../db.js';
-
-import * as question from '../models/question.js';
-
 //
 // The endpoint are:
 //
-// List     GET  http://localhost:4000/api/question
-// Details  GET  http://localhost:4000/api/question/123
-// Create   POST http://localhost:4000/api/question
-// Modify   PUT  http://localhost:4000/api/question/123
+// List     GET   /api/question
+// Details  GET   /api/question/:question_id
+// Create   POST  /api/question
+// Modify   PATCH /api/question/:question_id
 //
 
+import { Router } from 'express';
+
+import { getConn } from './db.js';
+
+import {
+    NotOwnerError,
+    ResourceAlreadyExistsDBError,
+    ResourceNotFoundError,
+} from './errors.js';
+
+import {
+    notAvailableInProduction,
+    validateBodyProps,
+    validateIdParam,
+    validatePartialBodyProps,
+    validateRequestJWT,
+    wrapAsync,
+} from './util.js';
+
+import * as model from '../models/question.js';
+
+//
+// Request body types
+//
+type ListQuestionsReqBody = null;
+type ListQuestionsResBody = model.Question[];
+
+type DetailQuestionReqBody = null;
+type DetailQuestionResBody = model.Question;
+
+type CreateQuestionReqBody = Omit<model.CreateQuestion, 'profile_id'>;
+type CreateQuestionResBody = { question_id: number; };
+
+type ModifyQuestionReqBody = Partial<model.UpdateQuestion>;
+type ModifyQuestionResBody = null;
+
 export default (router: Router) => {
-    // Route method: GET
-    // Route path: /question
-    // Request URL: http://localhost:4000/api/question
-    router.get('/', (req, res) => {
-        // TODO: Add pagination. Don't actually serve all questions in one
-        // request.
+    // List questions handler
+    router.get('/', wrapAsync(async (req, res) => {
+        notAvailableInProduction();
 
-        withConn(res, async (conn) => {
-            const questions = await question.getQuestions(conn);
+        const conn = await getConn(req);
+        const questions: ListQuestionsResBody =
+            await model.getQuestions(conn);
 
-            res.json(questions);
-        });
+        res.json(questions);
+    }));
+
+    // Detail question handler
+    router.get('/:question_id', async (req, res) => {
+        const question_id = validateIdParam(req.params.question_id);
+
+        const conn = await getConn(req);
+        const question: DetailQuestionResBody | null =
+            await model.getQuestion(conn, question_id);
+        if (question === null) {
+            throw new ResourceNotFoundError();
+        }
+
+        res.json(question);
     });
 
-    // Route method: GET
-    // Route path: /question/:id
-    // Request URL: http://localhost:4000/api/question/123
-    //
-    // req.params: {
-    //     "id": 123
-    // }
-    router.get('/:id', async (req, res) => {
-        withConn(res, async (conn) => {
-            const { id: _id } = req.params;
-
-            const valid = question.isIdValid(_id);
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
+    // Create question handler
+    router.post('/', wrapAsync(async (req, res) => {
+        const {
+            prompt,
+            description,
+        } = validateBodyProps<CreateQuestionReqBody>(
+            req.body,
+            {
+                prompt: model.isPromptValid,
+                description: model.isDescriptionValid,
             }
+        );
 
-            const id = parseInt(_id);
+        const { profile_id } = await validateRequestJWT(req);
 
-            const q = await question.getQuestion(conn, id);
-            if (q === null) {
-                res.sendStatus(404);
-                return;
-            }
-
-            res.json(q);
+        const conn = await getConn(req);
+        const question_id = await model.createQuestion(conn, {
+            profile_id,
+            prompt,
+            description,
         });
-    });
 
-    // Route method: POST
-    // Route path: /question
-    // Request URL: http://localhost:4000/api/question
-    //
-    // req.headers.authorization: "Bearer a.b.c"
-    // req.body: {
-    //     "prompt": "Prompt for question",
-    //     "description": "Description for question",
-    // }
-    router.post('/', async (req, res) => {
-        withConn(res, async (conn) => {
-            const {
-                prompt: _prompt,
-                description: _description
-            } = req.body;
+        const resBody: CreateQuestionResBody = { question_id };
 
-            const valid =
-                question.isPromptValid(_prompt) &&
-                question.isDescriptionValid(_description);
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
+        res.json(resBody);
+    }));
+
+    // Modify question handler
+    router.patch('/:id', wrapAsync(async (req, res) => {
+        const question_id = validateIdParam(req.params.question_id);
+        const {
+            prompt,
+            description,
+        } = validatePartialBodyProps<ModifyQuestionReqBody>(
+            req.body,
+            {
+                prompt: model.isPromptValid,
+                description: model.isDescriptionValid,
             }
+        );
 
-            const prompt = _prompt as string;
-            const description = _description as string;
+        const { profile_id } = await validateRequestJWT(req);
 
-            const payload = await auth.verifyRequestJWT(req);
-            if (payload === null) {
-                res.status(400).send('Invalid authorization');
-                return;
-            }
+        // Get existing question.
+        const conn = await getConn(req);
+        const question = await model.getQuestion(conn, question_id);
+        if (question === null) {
+            throw new ResourceNotFoundError();
+        }
 
-            const { profile_id } = payload;
+        if (question.profile_id !== profile_id) {
+            throw new NotOwnerError();
+        }
 
-            const questionId = await question.createQuestion(conn, {
-                profile_id,
-                prompt,
-                description,
-            });
+        // Apply requested changes.
+        if (prompt !== undefined) {
+            question.prompt = prompt;
+        }
 
-            res.json({ id: questionId });
-        });
-    });
+        if (description !== undefined) {
+            question.description = description;
+        }
 
-    // Route method: PUT
-    // Route path: /question/:id
-    // Request URL: http://localhost:4000/api/question/123
-    //
-    // req.headers.authorization: "Bearer a.b.c"
-    // req.params: {
-    //     "id": 123
-    // }
-    // req.body: {
-    //     "prompt": "my new prompt",
-    //     "description": "my new description"
-    // }
-    router.put('/:id', async (req, res) => {
-        withConn(res, async (conn) => {
-            const { id: _id } = req.params;
-            const { prompt: _prompt, description: _description } = req.body;
+        await model.updateQuestion(conn, question);
 
-            const valid =
-                question.isIdValid(_id) &&
-                (_prompt === undefined || question.isPromptValid(_prompt)) &&
-                (_description === undefined ||
-                 question.isDescriptionValid(_description));
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
-            }
-
-            const id = parseInt(_id);
-            const prompt = _prompt as string | undefined;
-            const description = _description as string | undefined;
-
-            const payload = await auth.verifyRequestJWT(req);
-            if (payload === null) {
-                res.status(400).send('Invalid authorization');
-                return;
-            }
-
-            const { profile_id } = payload;
-
-            // Get existing question.
-            const q = await question.getQuestion(conn, id);
-            if (q === null) {
-                res.status(400).send('Invalid request parameters');
-                return;
-            }
-
-            if (q.profile_id !== profile_id) {
-                res.sendStatus(403);
-                return;
-            }
-
-            // Apply changes from this PUT.
-            if (prompt !== undefined) {
-                q.prompt = prompt;
-            }
-
-            if (description !== undefined) {
-                q.description = description;
-            }
-
-            await question.updateQuestion(conn, q);
-
-            res.send('OK');
-        });
-    });
+        res.sendStatus(200);
+    }));
 };

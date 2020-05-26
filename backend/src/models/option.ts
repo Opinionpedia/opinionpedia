@@ -1,8 +1,11 @@
 import SQL from 'sql-template-strings';
 
-import { CURRENT_DATE, SQLDate, isId, isVarchar } from './util.js';
+import { SQLDate, isId, isVarchar } from './util.js';
 
 import { Conn } from '../db.js';
+
+const MAXIMUM_PROMPT_LENGTH = 1000;
+const MAXIMUM_DESCRIPTION_LENGTH = 3000;
 
 export interface Option {
     id: number;
@@ -34,9 +37,6 @@ export interface UpdateOption {
     prompt: string;
     description: string | null;
 }
-
-const MAXIMUM_PROMPT_LENGTH = 1000;
-const MAXIMUM_DESCRIPTION_LENGTH = 3000;
 
 export function isIdValid(value: any) {
     return isId(value);
@@ -96,16 +96,9 @@ export async function createOption(
         description,
     } = option;
 
-    const created = CURRENT_DATE;
-    const updated = CURRENT_DATE;
-
     const stmt = SQL`
-        INSERT INTO option_
-        (profile_id, question_id, prompt, description, created,
-         updated)
-        VALUES
-        (${profile_id}, ${question_id}, ${prompt}, ${description}, ${created},
-         ${updated})`;
+        INSERT INTO option_ (profile_id, question_id, prompt, description)
+        VALUES (${profile_id}, ${question_id}, ${prompt}, ${description})`;
 
     const { results } = await conn.query(stmt);
 
@@ -126,8 +119,6 @@ export async function updateOption(
         prompt,
         description,
     } = option;
-
-    const updated = CURRENT_DATE;
 
     const stmt = SQL`
         UPDATE option_

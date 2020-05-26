@@ -1,20 +1,26 @@
 {
     "dependencies": {
-        "@types/express": "^4.17.6",
-        "@types/jsonwebtoken": "^8.3.9",
-        "@types/mysql": "^2.15.10",
+        "compression": "^1.7.4",
         "dotenv": "^8.2.0",
         "express": "^4.17.1",
         "jsonwebtoken": "^8.5.1",
         "mysql": "^2.18.1",
-        "sql-template-strings": "^2.2.2",
+        "sql-template-strings": "^2.2.2"
+    },
+    "devDependencies": {
+        "@types/compression": "^1.7.0",
+        "@types/express": "^4.17.6",
+        "@types/jsonwebtoken": "^8.3.9",
+        "@types/mysql": "^2.15.10",
         "typescript": "^3.8.3"
     },
     "license": "GPL-3.0-only",
     "scripts": {
         "build": "tsc",
         "watch": "tsc -w",
-        "start": "node --experimental-modules -r dotenv/config build"
+        "start-dev": "bash -c 'NODE_ENV=development node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
+        "start-prod": "bash -c 'NODE_ENV=production node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
+        "test": "node --experimental-modules --unhandled-rejections=strict test.js"
     },
     "type": "module"
 }

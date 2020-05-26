@@ -1,269 +1,261 @@
-import { Router } from 'express';
-
-import * as auth from '../auth.js';
-import { ERR_MYSQL_DUP_ENTRY, withConn } from '../db.js';
-import { hashPassword, makeSalt } from '../password.js';
-
-import * as profile from '../models/profile.js';
-
 //
 // The endpoint are:
 //
-// List     GET  http://localhost:4000/api/profile
-// Details  GET  http://localhost:4000/api/profile/123
-// Details  GET  http://localhost:4000/api/profile/pdm
-// Create   POST http://localhost:4000/api/profile
-// Modify   PUT  http://localhost:4000/api/profile
-// Login    POST http://localhost:4000/api/login
+// List     GET   /api/profile
+// Details  GET   /api/profile/:id_or_username
+// Create   POST  /api/profile
+// Modify   PATCH /api/profile
+// Login    POST  /api/login
 //
 
+import { Router } from 'express';
+
+import { getConn } from './db.js';
+import {
+    HTTP500InternalServerError,
+    IncorrectPassword,
+    InvalidParametersError,
+    ResourceAlreadyExistsDBError,
+    ResourceNotFoundError,
+} from './errors.js';
+
+import {
+    asString,
+    getIdParam,
+    getParam,
+    notAvailableInProduction,
+    validateBodyProps,
+    validatePartialBodyProps,
+    validateRequestJWT,
+    wrapAsync,
+} from './util.js';
+
+import * as auth from '../auth.js';
+import { ERR_MYSQL_DUP_ENTRY } from '../db.js';
+import { hashPassword, makeSalt } from '../password.js';
+
+import * as model from '../models/profile.js';
+
+type CleanProfile = Omit<model.Profile, 'salt' | 'password'>;
+
+//
+// Request body types
+//
+type ListProfileReqBody = null;
+type ListProfileResBody = CleanProfile[];
+
+type DetailProfileReqBody = null;
+type DetailProfileResBody = CleanProfile;
+
+type CreateProfileReqBody = Omit<model.CreateProfile, 'salt'>;
+type CreateProfileResBody = {
+    profile_id: number;
+    token: string;
+};
+
+type ModifyProfileReqBody = Partial<model.UpdateProfile>;
+type ModifyProfileResBody = null;
+
+type LoginReqBody = {
+    username: string;
+    password: string;
+};
+type LoginResBody = {
+    profile_id: number;
+    token: string;
+};
+
+function cleanProfile(profile: model.Profile): CleanProfile {
+    const cleaned = Object.assign({}, profile);
+    delete cleaned.salt;
+    delete cleaned.password;
+    return cleaned;
+}
+
+interface IdOrUsername {
+    profile_id: number | null;
+    username: string | null;
+}
+
+function getIdOrUsernameParam(id_or_username: string): IdOrUsername {
+    const profile_id = getIdParam(id_or_username);
+    const username = getParam(
+        id_or_username,
+        asString,
+        model.isUsernameValid
+    );
+
+    if (profile_id === null && username === null) {
+        throw new InvalidParametersError();
+    }
+
+    return { profile_id, username };
+}
+
 export default (routers: { profile: Router, login: Router }) => {
-    // Route method: GET
-    // Route path: /profile
-    // Request URL: http://localhost:4000/api/profile
-    routers.profile.get('/', (req, res) => {
-        withConn(res, async (conn) => {
-            if (process.env.NODE_ENV === 'production') {
-                // Route unavailable in production.
-                res.sendStatus(403);
-                return;
+    // List profiles handler
+    routers.profile.get('/', wrapAsync(async (req, res) => {
+        notAvailableInProduction();
+
+        const conn = await getConn(req);
+        const profiles = await model.getProfiles(conn);
+
+        const cleanedProfiles: ListProfileResBody = profiles.map(cleanProfile);
+
+        res.json(cleanedProfiles);
+    }));
+
+    // Detail profile handler
+    routers.profile.get('/:id_or_username', wrapAsync(async (req, res) => {
+        const { profile_id, username } =
+            getIdOrUsernameParam(req.params.id_or_username);
+
+        const conn = await getConn(req);
+        const profile: model.Profile | null =
+            profile_id !== null
+                ? await model.getProfile(conn, profile_id)
+                : await model.getProfileByUsername(conn, username!);
+        if (profile === null) {
+            throw new ResourceNotFoundError();
+        }
+
+        const cleaned: DetailProfileResBody = cleanProfile(profile);
+
+        res.json(cleaned);
+    }));
+
+    // Create profile handler
+    routers.profile.post('/', wrapAsync(async (req, res) => {
+        const {
+            username,
+            password,
+            description,
+            body,
+        } = validateBodyProps<CreateProfileReqBody>(
+            req.body,
+            {
+                username: model.isUsernameValid,
+                password: model.isPasswordValid,
+                description: model.isDescriptionValid,
+                body: model.isBodyValid,
             }
+        );
 
-            const profiles = await profile.getProfiles(conn);
+        const salt = await makeSalt();
+        const hash = await hashPassword(password, salt);
 
-            for (const profile of profiles) {
-                delete profile.password;
-                delete profile.salt;
-            }
+        const conn = await getConn(req);
 
-            res.json(profiles);
-        });
-    });
-
-    // Route method: GET
-    // Route path: /profile/:id_or_username
-    //
-    // Example 1:
-    // Request URL: http://localhost:4000/api/profile/123
-    // req.params: {
-    //     "id_or_username": "123"
-    // }
-    //
-    // Example 2:
-    // Request URL: http://localhost:4000/api/profile/pdm
-    // req.params: {
-    //     "id_or_username": "pdm"
-    // }
-    routers.profile.get('/:id_or_username', async (req, res) => {
-        withConn(res, async (conn) => {
-            const { id_or_username } = req.params;
-
-            const valid = profile.isIdValid(id_or_username) ||
-                          profile.isUsernameValid(id_or_username);
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
-            }
-
-            const p = profile.isIdValid(id_or_username)
-                ? await profile.getProfile(conn, parseInt(id_or_username))
-                : await profile.getProfileByUsername(conn, id_or_username);
-
-            if (p === null) {
-                res.sendStatus(404);
-                return;
-            }
-
-            delete p.password;
-            delete p.salt;
-
-            res.json(p);
-        });
-    });
-
-    // Route method: POST
-    // Route path: /profile
-    // Request URL: http://localhost:4000/api/profile
-    //
-    // req.body: {
-    //     "username": "ammc",
-    //     "password": "password",
-    //     "description": "Description for profile ammc",
-    //     "body": "Body for profile ammc"
-    // }
-    routers.profile.post('/', async (req, res) => {
-        withConn(res, async (conn) => {
-            const {
-                username: _username,
-                password: _password,
-                description: _description,
-                body: _body,
-            } = req.body;
-
-            const valid =
-                profile.isUsernameValid(_username) &&
-                profile.isPasswordValid(_password) &&
-                profile.isDescriptionValid(_description) &&
-                profile.isBodyValid(_body);
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
-            }
-
-            const username = _username as string;
-            const password = _password as string;
-            const description = _description as string;
-            const body = _body as string;
-
-            const salt = await makeSalt();
-            const hash = await hashPassword(password, salt);
-
-            let id;
-            try {
-                id = await profile.createProfile(conn, {
-                    username,
-                    password: hash.toString('hex'),
-                    salt: salt.toString('hex'),
-                    description,
-                    body,
-                });
-            } catch (err) {
-                if (err.code === ERR_MYSQL_DUP_ENTRY) {
-                    res.status(400).send('Profile already exists');
-                    return;
-                }
-
+        let profile_id: number;
+        try {
+            profile_id = await model.createProfile(conn, {
+                username,
+                salt: salt.toString('hex'),
+                password: hash.toString('hex'),
+                description,
+                body,
+            });
+        } catch (err) {
+            if (err.code === ERR_MYSQL_DUP_ENTRY) {
+                throw new ResourceAlreadyExistsDBError();
+            } else {
                 throw err;
             }
+        }
 
-            // No need to hit /login after this. We give you a token now.
-            const token = await auth.signJWT({ profile_id: id });
+        // No need to hit /login after this. We give you a token now.
+        const token = await auth.signJWT({ profile_id });
 
-            res.send(token);
-        });
-    });
+        const resBody: CreateProfileResBody = { profile_id, token };
+        res.json(resBody);
+    }));
 
-    // Route method: PUT
-    // Route path: /profile
-    // Request URL: http://localhost:4000/api/profile
-    //
-    // req.headers.authorization: "Bearer a.b.c"
-    // req.body: {
-    //     "username": "my new username",
-    //     "password": "my new password",
-    //     "description": "my new description",
-    //     "body": "my new body"
-    // }
-    routers.profile.put('/', async (req, res) => {
-        withConn(res, async (conn) => {
-            const {
-                username: _username,
-                password: _password,
-                description: _description,
-                body: _body,
-            } = req.body;
-
-            const valid =
-                (_username === undefined ||
-                 profile.isUsernameValid(_username)) &&
-                (_password === undefined ||
-                 profile.isPasswordValid(_password)) &&
-                (_description === undefined ||
-                 profile.isDescriptionValid(_description)) &&
-                (_body === undefined || profile.isBodyValid(_body));
-            if (!valid) {
-                res.status(400).send('Invalid request parameters');
-                return;
+    // Modify profile handler
+    routers.profile.patch('/', wrapAsync(async (req, res) => {
+        const {
+            username,
+            password,
+            description,
+            body,
+        } = validatePartialBodyProps<ModifyProfileReqBody>(
+            req.body,
+            {
+                username: model.isUsernameValid,
+                password: model.isPasswordValid,
+                description: model.isDescriptionValid,
+                body: model.isBodyValid,
             }
+        );
 
-            const username = _username as string | undefined;
-            const password = _password as string | undefined;
-            const description = _description as string | undefined;
-            const body = _body as string | undefined;
+        const { profile_id } = await validateRequestJWT(req);
 
-            const payload = await auth.verifyRequestJWT(req);
-            if (payload === null) {
-                res.status(400).send('Invalid authorization');
-                return;
-            }
+        // Get existing profile.
+        const conn = await getConn(req);
+        const profile = await model.getProfile(conn, profile_id);
+        if (profile === null) {
+            // The JWT is valid, so a profile must have existed at some
+            // point...
+            throw new HTTP500InternalServerError('Unknown profile');
+        }
 
-            const { profile_id } = payload;
+        // Apply requested changes.
+        if (username !== undefined) {
+            profile.username = username;
+        }
 
-            // Get existing profile.
-            const p = await profile.getProfile(conn, profile_id);
-            if (p === null) {
-                res.status(500).send('Unknown profile');
-                return;
-            }
-
-            // Apply changes from this PUT.
-            if (username !== undefined) {
-                p.username = username;
-            }
-
-            if (password !== undefined) {
-                const salt = Buffer.from(p.salt, 'hex');
-                const hash = await hashPassword(password, salt);
-                p.password = hash.toString('hex');
-            }
-
-            if (body !== undefined) {
-                p.body = body;
-            }
-
-            if (description !== undefined) {
-                p.description = description;
-            }
-
-            await profile.updateProfile(conn, p);
-
-            res.send('OK');
-        });
-    });
-
-    // Route method: POST
-    // Route path: /login
-    // Request URL: http://localhost:4000/api/login
-    //
-    // req.body: {
-    //     "username": "ammc",
-    //     "password": "password"
-    // }
-    routers.login.post('/', async (req, res) => {
-        withConn(res, async (conn) => {
-            const { username: _username, password: _password } = req.body;
-
-            const invalid =
-                !profile.isUsernameValid(_username) ||
-                !profile.isPasswordValid(_password);
-            if (invalid) {
-                res.status(400).send('Invalid request parameters');
-                return;
-            }
-
-            const username = _username as string;
-            const password = _password as string;
-
-            // Get existing profile.
-            const p = await profile.getProfileByUsername(conn, username);
-
-            if (p === null) {
-                res.status(400).send('Profile does not exist');
-                return;
-            }
-
-            const salt = Buffer.from(p.salt, 'hex');
+        if (password !== undefined) {
+            const salt = Buffer.from(profile.salt, 'hex');
             const hash = await hashPassword(password, salt);
+            profile.password = hash.toString('hex');
+        }
 
-            // Apply changes from this PUT.
-            if (p.password !== hash.toString('hex')) {
-                res.status(400).send('Incorrect password');
-                return;
+        if (body !== undefined) {
+            profile.body = body;
+        }
+
+        if (description !== undefined) {
+            profile.description = description;
+        }
+
+        await model.updateProfile(conn, profile);
+
+        res.sendStatus(200);
+    }));
+
+    // Login handler
+    routers.login.post('/', wrapAsync(async (req, res) => {
+        const {
+            username,
+            password,
+        } = validatePartialBodyProps<LoginReqBody>(
+            req.body,
+            {
+                username: model.isUsernameValid,
+                password: model.isPasswordValid,
             }
+        );
 
-            const token = await auth.signJWT({ profile_id: p.id });
+        // Get existing profile.
+        const conn = await getConn(req);
+        const profile = await model.getProfileByUsername(conn, username);
+        if (profile === null) {
+            throw new ResourceNotFoundError();
+        }
 
-            res.send(token);
-        });
-    });
+        const salt = Buffer.from(profile.salt, 'hex');
+        const hash = await hashPassword(password, salt);
+
+        if (profile.password !== hash.toString('hex')) {
+            throw new IncorrectPassword();
+        }
+
+        const token = await auth.signJWT({ profile_id: profile.id });
+
+        const resBody: LoginResBody = {
+            profile_id: profile.id,
+            token,
+        };
+
+        res.json(resBody);
+    }));
 };

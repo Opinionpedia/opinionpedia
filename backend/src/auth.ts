@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 const JWT_EXPIRATION_TIME = '1 hour';
 
 // FIXME: Change to environment variable / use secret store.
-const secret: jwt.Secret = 'secret';
+const secret: jwt.Secret = process.env.JWT_SECRET || 'secret';
 
 /**
  * Information about clients stored on the client. Cryptographically
@@ -124,30 +124,4 @@ export async function verifyJWT(token: string): Promise<Token | null> {
     return {
         profile_id: sub,
     };
-}
-
-/**
- * Verify an authentication token in the Authorization header on an HTTP
- * request.
- *
- * @param req - The HTTP request
- * @returns A Promise with either the decoded token or null if error
- */
-export async function verifyRequestJWT(req: Request): Promise<Token | null> {
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-        return null;
-    }
-
-    const parts = authorization.split(' ');
-    if (parts.length !== 2) {
-        return null;
-    }
-    if (parts[0] !== 'Bearer') {
-        return null;
-    }
-
-    const token = parts[1];
-
-    return await verifyJWT(token);
 }

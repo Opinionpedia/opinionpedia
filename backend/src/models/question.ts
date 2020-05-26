@@ -1,8 +1,11 @@
 import SQL from 'sql-template-strings';
 
-import { CURRENT_DATE, SQLDate, isId, isVarchar } from './util.js';
+import { SQLDate, isId, isVarchar } from './util.js';
 
 import { Conn } from '../db.js';
+
+const MAXIMUM_PROMPT_LENGTH = 3000;
+const MAXIMUM_DESCRIPTION_LENGTH = 10000;
 
 export interface Question {
     id: number;
@@ -31,9 +34,6 @@ export interface UpdateQuestion {
     prompt: string;
     description: string;
 }
-
-const MAXIMUM_PROMPT_LENGTH = 3000;
-const MAXIMUM_DESCRIPTION_LENGTH = 10000;
 
 export function isIdValid(value: any): boolean {
     return isId(value);
@@ -83,14 +83,9 @@ export async function createQuestion(
         description,
     } = question;
 
-    const created = CURRENT_DATE;
-    const updated = CURRENT_DATE;
-
     const stmt = SQL`
-        INSERT INTO question
-        (profile_id, prompt, description, created, updated)
-        VALUES
-        (${profile_id}, ${prompt}, ${description}, ${created}, ${updated})`;
+        INSERT INTO question (profile_id, prompt, description)
+        VALUES (${profile_id}, ${prompt}, ${description})`;
 
     const { results } = await conn.query(stmt);
 
@@ -111,14 +106,11 @@ export async function updateQuestion(
         description,
     } = question;
 
-    const updated = CURRENT_DATE;
-
     const stmt = SQL`
         UPDATE question
         SET profile_id = ${profile_id},
             prompt = ${prompt},
-            description = ${description},
-            updated = ${updated}
+            description = ${description}
         WHERE id = ${id}`;
 
     await conn.query(stmt);
