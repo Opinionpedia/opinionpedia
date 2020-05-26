@@ -70,32 +70,31 @@ Here's an illustrative bash script that takes some typical actions. Skim it to
 get a feeling for what it does and then try giving it a run.
 
 ```bash
+#!/bin/bash
 host=localhost:4000
 
 send_request() {
+    local method = "$1"
+    local path = "$2"
+    local body = "$3"
+
     curl -D - -sS -X $method \
                   -H 'Content-Type: application/json' \
                   -d "$body" $host$path
     echo
 }
 
-method=POST
-path=/api/profile
-body='{
+send_request POST /api/profile '{
     "username": "your name",
     "password": "some password",
     "description": null,
     "body": null
 }'
-send_request
 
-method=POST
-path=/api/login
-body='{
+send_request POST /api/login '{
     "username": "your name",
     "password": "some password"
 }'
-send_request
 
 echo 'Your authentication token should be displayed (twice), please save it'
 ```
