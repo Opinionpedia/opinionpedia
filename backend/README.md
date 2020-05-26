@@ -74,9 +74,9 @@ get a feeling for what it does and then try giving it a run.
 host=localhost:4000
 
 send_request() {
-    local method = "$1"
-    local path = "$2"
-    local body = "$3"
+    local method="$1"
+    local path="$2"
+    local body="$3"
 
     curl -D - -sS -X $method \
                   -H 'Content-Type: application/json' \
