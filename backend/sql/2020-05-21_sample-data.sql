@@ -1,6 +1,5 @@
--- In this file, although it is unnecessary, we explicitly assign ids because
---   1) we know the database is empty so all ids start with 1, and
---   2) it is easier to read.
+-- Ids in all tables are set to AUTO_INCREMENT, but we explicitly assign them
+-- in this file so we can use them as foreign keys.
 
 -- Profile 1, username ammc
 -- Profile 2, username fei
