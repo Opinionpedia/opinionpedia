@@ -1,3 +1,10 @@
+Opinionpedia backend
+====================
+
+Source of truth for Opinionpedia's primary data.
+
+
+
 Getting started
 ===============
 
