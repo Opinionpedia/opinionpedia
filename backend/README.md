@@ -69,7 +69,7 @@ Try creating a profile and logging in
 Here's an illustrative bash script that takes some typical actions. Skim it to
 get a feeling for what it does and then try giving it a run.
 
-```
+```bash
 host=localhost:4000
 
 send_request() {
