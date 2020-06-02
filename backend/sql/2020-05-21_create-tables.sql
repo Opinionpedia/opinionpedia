@@ -91,7 +91,7 @@ CREATE TABLE vote (
                       ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    UNIQUE (profile_id, question_id, option_id, header),
+    UNIQUE (profile_id, question_id),
     FOREIGN KEY (profile_id) REFERENCES profile(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
