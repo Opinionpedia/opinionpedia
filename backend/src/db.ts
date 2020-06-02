@@ -23,6 +23,9 @@ const config: mysql.ConnectionConfig = {
     multipleStatements: true,
 };
 
+// Thrown errors from MySQL queries will have a `code` string property.
+// Common errors we want to handle are:
+
 /**
  * Error: ER_DUP_ENTRY
  * Example: Inserting a row into a table with a primary key already in use.

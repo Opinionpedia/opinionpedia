@@ -14,6 +14,7 @@ import { getConn } from './db.js';
 
 import {
     NotOwnerError,
+    ReferencedResourceNotFound,
     ResourceNotFoundError,
 } from './errors.js';
 
@@ -25,6 +26,8 @@ import {
     validateRequestJWT,
     wrapAsync,
 } from './util.js';
+
+import { ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 
 import * as model from '../models/option.js';
 
@@ -100,12 +103,23 @@ export default (router: Router) => {
         const { profile_id } = await validateRequestJWT(req);
 
         const conn = await getConn(req);
-        const option_id = await model.createOption(conn, {
-            profile_id,
-            question_id,
-            prompt,
-            description,
-        });
+
+        let option_id;
+        try {
+            option_id = await model.createOption(conn, {
+                profile_id,
+                question_id,
+                prompt,
+                description,
+            });
+        } catch (err) {
+            if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
+                // The profile and/or question don't exist in the database.
+                throw new ReferencedResourceNotFound();
+            } else {
+                throw err;
+            }
+        }
 
         const resBody: CreateOptionResBody = { option_id };
 

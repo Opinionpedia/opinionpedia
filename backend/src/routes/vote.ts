@@ -14,6 +14,7 @@ import { getConn } from './db.js';
 
 import {
     NotOwnerError,
+    ReferencedResourceNotFound,
     ResourceAlreadyExistsDBError,
     ResourceNotFoundError,
 } from './errors.js';
@@ -27,7 +28,10 @@ import {
     wrapAsync,
 } from './util.js';
 
-import { ERR_MYSQL_DUP_ENTRY } from '../db.js';
+import {
+    ERR_MYSQL_DUP_ENTRY,
+    ERR_MYSQL_NO_REFERENCED_ROW,
+} from '../db.js';
 
 import * as model from '../models/vote.js';
 
@@ -123,7 +127,12 @@ export default (router: Router) => {
             });
         } catch (err) {
             if (err.code === ERR_MYSQL_DUP_ENTRY) {
+                // This profile already voted on this question.
                 throw new ResourceAlreadyExistsDBError();
+            } else if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
+                // The profile, question, and/or option don't exist in the
+                // database.
+                throw new ReferencedResourceNotFound();
             } else {
                 throw err;
             }

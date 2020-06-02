@@ -118,7 +118,14 @@ export class NotAvailableInProductionError extends HTTP403ForbiddenError {
     }
 }
 
-// SQL INSERT or UPDATE failed due to a uniquness constraint.
+// SQL INSERT or UPDATE fails due to a FOREIGN KEY constraint.
+export class ReferencedResourceNotFound extends HTTP404NotFoundError {
+    constructor() {
+        super('Referenced resource not found');
+    }
+}
+
+// SQL INSERT or UPDATE failed due to a UNIQUE constraint.
 export class ResourceAlreadyExistsDBError extends HTTP400BadRequestError {
     constructor() {
         super('Already exists');
