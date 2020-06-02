@@ -31,6 +31,24 @@ const config: mysql.ConnectionConfig = {
  */
 export const ERR_MYSQL_DUP_ENTRY = 'ER_DUP_ENTRY';
 
+/**
+ * Error: ER_NO_REFERENCED_ROW_2
+ * Situation: When you try to add a row but there is no parent row, and a
+ *            foreign key constraint fails.
+ * Documentation:
+ *     https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_no_referenced_row_2
+ */
+export const ERR_MYSQL_NO_REFERENCED_ROW = 'ER_NO_REFERENCED_ROW_2';
+
+/**
+ * Error: ER_ROW_IS_REFERENCED_2
+ * Situation: When you try to delete a parent row that has children, and a
+ *            foreign key constraint fails.
+ * Documentation:
+ *     https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_row_is_referenced_2
+ */
+export const ERR_MYSQL_ROW_IS_REFERENCED = 'ER_ROW_IS_REFERENCED_2';
+
 export type QueryOptions = mysql.QueryOptions;
 
 export class QueryResults {
