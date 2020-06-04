@@ -1,4 +1,4 @@
-Opinionpedia backend
+Opinionpedia backend &middot; ![Backend integration tests](https://github.com/Opinionpedia/opinionpedia/workflows/Backend%20integration%20tests/badge.svg)
 ====================
 
 Source of truth for Opinionpedia's primary data.
