@@ -13,36 +13,58 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build the docker-compose stack
+    - name: Build the backend server
       run: |
         cd backend
         docker-compose build
 
-    - name: Run the backend server
+    - name: Start MySQL and the backend server
       run: |
         cd backend
         docker-compose up -d
 
-    - name: Wait 20 seconds
-      run: sleep 20
-
-    - name: Check the backend server status
+    - name: Wait for backend server to be ready
       run: |
-        docker ps -a
-        echo
-
-        docker logs -t backend_backend_1
-        echo
-
-        running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
-        if [ "$running" = 'false' ]; then
-            docker logs -t backend_mysql_1
-            echo
-            echo NOT RUNNING, ERROR
-            exit 1
-        else
-            echo RUNNING, OK
+        is_backend_running() {
+            running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
+            test $running = true
         fi
+
+        is_backend_ready() {
+            latest_line=$(docker logs --tail 1 backend_backend_1)
+            test "$latest_line" = 'Finished setting up database'
+        }
+
+        die() {
+            docker ps -a
+            echo
+            docker logs backend_mysql_1
+            exit 1
+        }
+
+        tries=60
+
+        while true; do
+            sleep 1
+
+            if ! is_backend_running; then
+                echo 'Error: Backend has quit'
+                echo
+                die
+            fi
+
+            if is_backend_ready; then
+                exit 0
+            fi
+
+            tries=$((tries - 1))
+
+            if [ $tries = 0 ]; then
+                echo 'Error: Timeout after 60 seconds'
+                echo
+                die
+            fi
+        done
 
     - name: Run tests
       run: sh backend/test.sh
