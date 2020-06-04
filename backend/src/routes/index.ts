@@ -8,6 +8,7 @@ import setupProfile from './profile.js';
 import setupQuestion from './question.js';
 import setupOption from './option.js';
 import setupVote from './vote.js';
+import setupTag from './tag.js';
 
 import { development } from '../config.js';
 import { MySQLError } from '../errors.js';
@@ -119,17 +120,20 @@ function setupRoutes(router: Router) {
     const question = express.Router();
     const option = express.Router();
     const vote = express.Router();
+    const tag = express.Router();
 
     router.use('/profile', profile);
     router.use('/login', login);
     router.use('/question', question);
     router.use('/option', option);
     router.use('/vote', vote);
+    router.use('/tag', tag);
 
     setupProfile({ profile, login });
     setupQuestion(question);
     setupOption(option);
     setupVote(vote);
+    setupTag(tag);
 
     router.use(handleMySQLError);
     router.use(handleHTTPError);
