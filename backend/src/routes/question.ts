@@ -59,7 +59,7 @@ export default (router: Router) => {
     }));
 
     // Detail question handler
-    router.get('/:question_id', async (req, res) => {
+    router.get('/:question_id', wrapAsync(async (req, res) => {
         const question_id = validateIdParam(req.params.question_id);
 
         const conn = await getConn(req);
@@ -70,7 +70,7 @@ export default (router: Router) => {
         }
 
         res.json(question);
-    });
+    }));
 
     // Create question handler
     router.post('/', wrapAsync(async (req, res) => {
