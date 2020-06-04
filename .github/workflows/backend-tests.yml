@@ -28,7 +28,7 @@ jobs:
         is_backend_running() {
             running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
             test $running = true
-        fi
+        }
 
         is_backend_ready() {
             latest_line=$(docker logs --tail 1 backend_backend_1)
