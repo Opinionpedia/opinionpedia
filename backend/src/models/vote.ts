@@ -118,7 +118,7 @@ export async function createVote(
         INSERT INTO vote (profile_id, question_id, option_id, header, body,
                           description, active)
         VALUES (${profile_id}, ${question_id}, ${option_id}, ${header}, ${body},
-                ${description})`;
+                ${description}, ${active})`;
 
     const { results } = await conn.query(stmt);
 
