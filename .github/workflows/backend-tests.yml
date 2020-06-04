@@ -14,7 +14,13 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Build the docker-compose stack
-      run: (cd backend; docker-compose build)
+      run: |
+        cd backend
+        docker-compose build
     
     - name: Run tests
-      run: (cd backend; docker-compose up -d; sleep 5s; sh test.sh)
+      run: |
+        cd backend
+        docker-compose up -d
+        sleep 5s
+        sh test.sh
