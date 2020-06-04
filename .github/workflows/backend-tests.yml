@@ -32,7 +32,7 @@ jobs:
 
         is_backend_ready() {
             latest_line=$(docker logs --tail 1 backend_backend_1)
-            test "$latest_line" = 'Finished setting up database'
+            test "$latest_line" = 'Listening on port 4000'
         }
 
         die() {
