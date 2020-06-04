@@ -189,8 +189,8 @@ export class Conn {
     }
 
     async connect(): Promise<void> {
-        // Try to connect for up to 10 seconds.
-        let attempts = 20;
+        // Try to connect for up to 20 seconds.
+        let attempts = 40;
 
         while (true) {
             try {

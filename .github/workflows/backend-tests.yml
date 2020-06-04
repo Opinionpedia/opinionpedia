@@ -23,8 +23,8 @@ jobs:
         cd backend
         docker-compose up -d
 
-    - name: Sleep 10 seconds
-      run: sleep 10
+    - name: Wait 20 seconds
+      run: sleep 20
 
     - name: Check the backend server status
       run: |
@@ -36,6 +36,8 @@ jobs:
 
         running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
         if [ "$running" = 'false' ]; then
+            docker logs -t backend_mysql_1
+            echo
             echo NOT RUNNING, ERROR
             exit 1
         else
