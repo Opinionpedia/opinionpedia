@@ -142,7 +142,7 @@ export async function updateProfile(
         SET username = ${username},
             password = ${password},
             description = ${description},
-            body = ${body},
+            body = ${body}
         WHERE id = ${id}`;
 
     await conn.query(stmt);
