@@ -38,7 +38,7 @@ jobs:
         die() {
             docker ps -a
             echo
-            docker logs backend_mysql_1
+            docker logs backend_backend_1
             exit 1
         }
 
