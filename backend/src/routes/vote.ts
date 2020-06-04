@@ -130,7 +130,7 @@ export default (router: Router) => {
                 // This profile already voted on this question.
                 throw new ResourceAlreadyExistsDBError();
             } else if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
-                // The profile, question, and/or option don't exist in the
+                // The profile, question, and/or option doesn't exist in the
                 // database.
                 throw new ReferencedResourceNotFound();
             } else {

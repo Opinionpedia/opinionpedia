@@ -114,7 +114,7 @@ export default (router: Router) => {
             });
         } catch (err) {
             if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
-                // The profile and/or question don't exist in the database.
+                // The profile and/or question doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
             } else {
                 throw err;
