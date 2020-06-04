@@ -1,0 +1,20 @@
+name: Backend integration tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Build the docker-compose stack
+      run: (cd backend; docker-compose build)
+    
+    - name: Run tests
+      run: (cd backend; docker-compose -d up; sleep 5s; sh test.sh)
