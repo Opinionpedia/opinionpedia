@@ -13,6 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+
     - name: Build the backend server
       run: |
         cd backend
@@ -67,4 +72,6 @@ jobs:
         done
 
     - name: Run tests
-      run: sh backend/test.sh
+      run: |
+        cd backend
+        yarn test
