@@ -12,15 +12,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Build the docker-compose stack
       run: |
         cd backend
         docker-compose build
-    
-    - name: Run tests
+
+    - name: Run the backend server
       run: |
         cd backend
         docker-compose up -d
-        sleep 5s
-        sh test.sh
+
+    - name: Sleep 5 seconds
+      run: sleep 5
+
+    - name: Check the backend server status
+      run: |
+        docker ps -a
+        echo
+
+        docker logs -t backend_backend_1
+        echo
+
+        running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
+        if [ "$running" = 'false' ]; then
+            echo NOT RUNNING, ERROR
+            exit 1
+        else
+            echo RUNNING, OK
+        fi
+
+    - name: Run tests
+      run: sh backend/test.sh
