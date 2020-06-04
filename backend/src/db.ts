@@ -6,15 +6,17 @@ import SQL, { SQLStatement } from 'sql-template-strings';
 import { production } from './config.js';
 import { MySQLError, MySQLDriverError } from './errors.js';
 
-if (process.env.DB_USER === undefined ||
+if (process.env.DB_HOST === undefined ||
+    process.env.DB_USER === undefined ||
     process.env.DB_DATABASE === undefined ||
     process.env.DB_PASSWORD === undefined) {
-    console.error('Error: Please set DB_USER, DB_DATABASE, and DB_PASSWORD ' +
-                  'environment variables.');
+    console.error('Error: Please set DB_HOST, DB_USER, DB_DATABASE, and ' +
+                  'DB_PASSWORD environment variables.');
     process.exit(1);
 }
 
 const config: mysql.ConnectionConfig = {
+    host: process.env.DB_HOST,
     user: process.env.DB_USER,
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
@@ -69,6 +71,10 @@ class Measure {
     end(): number {
         return performance.now() - this.start;
     }
+}
+
+function wait(timeout: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
 /**
@@ -168,9 +174,11 @@ class PromisifiedMySQLConnection {
  * Connection to a MySQL database.
  */
 export class Conn {
-    private connection: PromisifiedMySQLConnection | null;
+    private connection: PromisifiedMySQLConnection | null = null;
 
-    constructor() {
+    constructor() {}
+
+    private init(): void {
         const connection = new PromisifiedMySQLConnection(config);
 
         // We have to register an error handler or else the mysql driver will
@@ -181,9 +189,26 @@ export class Conn {
     }
 
     async connect(): Promise<void> {
-        const connection = this.getConnection();
+        let attempts = 5;
 
-        await connection.connect();
+        while (true) {
+            try {
+                this.init();
+                const connection = this.getConnection();
+                await connection.connect();
+                break;
+            } catch (err) {
+                this.connection = null;
+
+                if (err.code === 'ECONNREFUSED' && attempts > 1) {
+                    attempts -= 1;
+                    await wait(500);
+                    continue;
+                } else {
+                    throw err;
+                }
+            }
+        }
     }
 
     async query(options: string | SQLStatement): Promise<QueryResults> {
