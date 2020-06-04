@@ -111,7 +111,7 @@ export default (router: Router) => {
     }));
 
     // Modify question handler
-    router.patch('/:id', wrapAsync(async (req, res) => {
+    router.patch('/:question_id', wrapAsync(async (req, res) => {
         const question_id = validateIdParam(req.params.question_id);
         const {
             prompt,
