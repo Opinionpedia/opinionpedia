@@ -33,7 +33,7 @@ const allowedMethods = [
     'OPTIONS',
 ].join(', ');
 
-function cors(req: Request, res: Response, next: NextFunction) {
+function cors(req: Request, res: Response, next: NextFunction): void {
     const origin = req.headers.origin;
     if (origin === undefined) {
         next();
@@ -106,6 +106,21 @@ function handleUnknownError(
     } else {
         res.sendStatus(500);
     }
+
+    next();
+}
+
+function handleNoSuchRoute(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
+    console.error('Route not found');
+
+    res.status(400);
+    res.type('txt');
+    res.send('Route not found');
+
     next();
 }
 
@@ -134,6 +149,8 @@ function setupRoutes(router: Router) {
     setupOption(option);
     setupVote(vote);
     setupTag(tag);
+
+    router.use(handleNoSuchRoute);
 
     router.use(handleMySQLError);
     router.use(handleHTTPError);
