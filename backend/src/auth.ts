@@ -24,20 +24,9 @@ function isJWTPayload(obj: unknown): obj is JWTPayload {
         return false;
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    const obj2 = obj as object;
+    const payload = obj as JWTPayload;
 
-    if (!('sub' in obj2)) {
-        return false;
-    }
-
-    const obj3 = obj2 as JWTPayload;
-
-    if (!Number.isInteger(obj3.sub)) {
-        return false;
-    }
-
-    return true;
+    return Number.isInteger(payload.sub);
 }
 
 /**
