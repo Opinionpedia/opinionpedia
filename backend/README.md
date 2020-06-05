@@ -144,6 +144,11 @@ Table of contents
   - [List votes on question](#list-votes-on-question)
   - [Create vote](#create-vote)
   - [Modify vote](#modify-vote)
+- Tags
+  - [List tags](#list-tags)
+  - [Detail tag](#detail-tag)
+  - [Create tag](#create-tag)
+  - [Modify tag](#modify-tag)
 
 
 
