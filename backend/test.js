@@ -69,18 +69,6 @@ function request({ method, path, token, body }) {
     });
 }
 
-function get(options) {
-    return request(Object.assign({}, options, { method: 'GET' }));
-}
-
-function post(options) {
-    return request(Object.assign({}, options, { method: 'POST' }));
-}
-
-function patch(options) {
-    return request(Object.assign({}, options, { method: 'PATCH' }));
-}
-
 /**
  * Print an HTTP response.
  */
@@ -125,6 +113,38 @@ function log(res) {
     console.log();
 }
 
+async function tryRequest(statusCode, options) {
+    const res = await request(options);
+    if (res.statusCode !== statusCode) {
+        log(res);
+        throw new Error(
+            `Expected HTTP status to be ${statusCode}, got ${res.statusCode}`);
+    }
+
+    return res;
+}
+
+function get(statusCode, options) {
+    return tryRequest(
+        statusCode,
+        Object.assign({}, options, { method: 'GET' })
+    );
+}
+
+function post(statusCode, options) {
+    return tryRequest(
+        statusCode,
+        Object.assign({}, options, { method: 'POST' })
+    );
+}
+
+function patch(statusCode, options) {
+    return tryRequest(
+        statusCode,
+        Object.assign({}, options, { method: 'PATCH' })
+    );
+}
+
 async function test() {
     let res;
 
@@ -132,15 +152,15 @@ async function test() {
     console.log('TESTING PROFILE');
     console.log('===============');
 
-    log(await get({ path: '/profile' }));
+    log(await get(200, { path: '/profile' }));
 
-    log(await get({ path: '/profile/1' }));
+    log(await get(200, { path: '/profile/1' }));
 
-    log(await get({ path: '/profile/pdm' }));
+    log(await get(200, { path: '/profile/pdm' }));
 
     const username = 'testuser' + (Math.random() * 10000).toFixed();
     let password = 'password';
-    res = await post({
+    res = await post(200, {
         path: '/profile',
         body: {
             username,
@@ -153,20 +173,20 @@ async function test() {
     const { profile_id } = res.json;
     const token = res.json.token;
 
-    log(await post({ path: '/login', body: { username, password }}));
+    log(await post(200, { path: '/login', body: { username, password }}));
 
     password = 'new password';
-    log(await patch({ path: '/profile', token, body: { password }}));
+    log(await patch(200, { path: '/profile', token, body: { password }}));
 
-    log(await post({ path: '/login', body: { username, password }}));
+    log(await post(200, { path: '/login', body: { username, password }}));
 
     console.log('================');
     console.log('TESTING QUESTION');
     console.log('================');
 
-    log(await get({ path: '/question' }));
+    log(await get(200, { path: '/question' }));
 
-    res = await post({
+    res = await post(200, {
         path: '/question',
         token,
         body: {
@@ -177,9 +197,9 @@ async function test() {
     log(res);
     const { question_id } = res.json;
 
-    log(await get({ path: `/question/${question_id}` }));
+    log(await get(200, { path: `/question/${question_id}` }));
 
-    log(await patch({
+    log(await patch(200, {
         path: `/question/${question_id}`,
         token,
         body: {
@@ -188,15 +208,15 @@ async function test() {
         },
     }));
 
-    log(await get({ path: `/question/${question_id}` }));
+    log(await get(200, { path: `/question/${question_id}` }));
 
     console.log('==============');
     console.log('TESTING OPTION');
     console.log('==============');
 
-    log(await get({ path: '/option' }));
+    log(await get(200, { path: '/option' }));
 
-    res = await post({
+    res = await post(200, {
         path: '/option',
         token,
         body: {
@@ -208,9 +228,9 @@ async function test() {
     log(res);
     const { option_id } = res.json;
 
-    log(await get({ path: `/option/${option_id}` }));
+    log(await get(200, { path: `/option/${option_id}` }));
 
-    log(await patch({
+    log(await patch(200, {
         path: `/option/${option_id}`,
         token,
         body: {
@@ -219,17 +239,17 @@ async function test() {
         },
     }));
 
-    log(await get({ path: `/option/${option_id}` }));
+    log(await get(200, { path: `/option/${option_id}` }));
 
-    log(await get({ path: `/option/question/${question_id}` }));
+    log(await get(200, { path: `/option/question/${question_id}` }));
 
     console.log('============');
     console.log('TESTING VOTE');
     console.log('============');
 
-    log(await get({ path: '/vote' }));
+    log(await get(200, { path: '/vote' }));
 
-    res = await post({
+    res = await post(200, {
         path: '/vote',
         token,
         body: {
@@ -245,9 +265,9 @@ async function test() {
     log(res);
     const { vote_id } = res.json;
 
-    log(await get({ path: `/vote/${vote_id}`}));
+    log(await get(200, { path: `/vote/${vote_id}`}));
 
-    log(await patch({
+    log(await patch(200, {
         path: `/vote/${vote_id}`,
         token,
         body: {
@@ -258,17 +278,17 @@ async function test() {
         },
     }));
 
-    log(await get({ path: `/vote/${vote_id}`}));
+    log(await get(200, { path: `/vote/${vote_id}`}));
 
-    log(await get({ path: `/vote/question/${question_id}`}));
+    log(await get(200, { path: `/vote/question/${question_id}`}));
 
     console.log('===========');
     console.log('TESTING TAG');
     console.log('===========');
 
-    log(await get({ path: '/tag' }));
+    log(await get(200, { path: '/tag' }));
 
-    res = await post({
+    res = await post(200, {
         path: '/tag',
         token,
         body: {
@@ -280,9 +300,9 @@ async function test() {
     log(res);
     const { tag_id } = res.json;
 
-    log(await get({ path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/${tag_id}`}));
 
-    log(await patch({
+    log(await patch(200, {
         path: `/tag/${tag_id}`,
         token,
         body: {
@@ -291,7 +311,7 @@ async function test() {
         },
     }));
 
-    log(await get({ path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/${tag_id}`}));
 }
 
 test();

@@ -74,4 +74,10 @@ jobs:
     - name: Run tests
       run: |
         cd backend
-        yarn test
+        if ! yarn test; then
+            echo
+            echo 'Backend log:'
+            docker logs backend_backend_1
+            echo
+            echo 'Error: Test failed'
+        fi
