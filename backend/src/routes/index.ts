@@ -9,6 +9,7 @@ import setupQuestion from './question.js';
 import setupOption from './option.js';
 import setupVote from './vote.js';
 import setupTag from './tag.js';
+import setupProfileTag from './profile_tag.js';
 
 import { development } from '../config.js';
 import { MySQLError } from '../errors.js';
@@ -113,6 +114,10 @@ function handleNoSuchRoute(
     res: Response,
     next: NextFunction
 ): void {
+    if (res.finished) {
+        return;
+    }
+
     console.error('Route not found');
 
     res.status(400);
@@ -134,6 +139,7 @@ function setupRoutes(router: Router): void {
     const option = express.Router();
     const vote = express.Router();
     const tag = express.Router();
+    const profileTag = express.Router();
 
     router.use('/profile', profile);
     router.use('/login', login);
@@ -141,12 +147,14 @@ function setupRoutes(router: Router): void {
     router.use('/option', option);
     router.use('/vote', vote);
     router.use('/tag', tag);
+    router.use('/tag/profile', profileTag);
 
     setupProfile({ profile, login });
     setupQuestion(question);
     setupOption(option);
     setupVote(vote);
     setupTag(tag);
+    setupProfileTag(profileTag);
 
     router.use(handleNoSuchRoute);
 

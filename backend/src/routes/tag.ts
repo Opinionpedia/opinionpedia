@@ -149,7 +149,16 @@ export default (router: Router): void => {
             tag.description = description;
         }
 
-        await model.updateTag(conn, tag);
+        try {
+            await model.updateTag(conn, tag);
+        } catch (err) {
+            if (err.code === ERR_MYSQL_DUP_ENTRY) {
+                // Tag already exists.
+                throw new ResourceAlreadyExistsDBError();
+            } else {
+                throw err;
+            }
+        }
 
         res.sendStatus(200);
     }));

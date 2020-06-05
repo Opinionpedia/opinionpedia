@@ -145,6 +145,10 @@ function patch(statusCode, options) {
     );
 }
 
+function randomNumber() {
+    return (Math.random() * 10000).toFixed();
+}
+
 async function test() {
     let res;
 
@@ -158,7 +162,7 @@ async function test() {
 
     log(await get(200, { path: '/profile/pdm' }));
 
-    const username = 'testuser' + (Math.random() * 10000).toFixed();
+    const username = 'testuser-' + randomNumber();
     let password = 'password';
     res = await post(200, {
         path: '/profile',
@@ -286,6 +290,8 @@ async function test() {
     console.log('TESTING TAG');
     console.log('===========');
 
+    const tagName = 'tag-' + randomNumber();
+
     log(await get(200, { path: '/tag' }));
 
     res = await post(200, {
@@ -293,8 +299,8 @@ async function test() {
         token,
         body: {
             profile_id,
-            name: 'Name for tag',
-            description: 'Description for tag',
+            name: `Name for ${tagName}`,
+            description: `Description for ${tagName}`,
         },
     });
     log(res);
@@ -306,12 +312,24 @@ async function test() {
         path: `/tag/${tag_id}`,
         token,
         body: {
-            name: 'New name for tag',
-            description: 'New description for tag',
+            name: `New name for ${tagName}`,
+            description: `New description for ${tagName}`,
         },
     }));
 
     log(await get(200, { path: `/tag/${tag_id}`}));
+
+    console.log('===================');
+    console.log('TESTING PROFILE TAG');
+    console.log('===================');
+
+    log(await post(200, {
+        path: '/tag/profile',
+        token,
+        body: { tag_id },
+    }));
+
+    log(await get(200, { path: `/tag/profile/${profile_id}`}));
 }
 
 test();
