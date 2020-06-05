@@ -115,6 +115,7 @@ function handleNoSuchRoute(
     next: NextFunction
 ): void {
     if (res.finished) {
+        next();
         return;
     }
 
