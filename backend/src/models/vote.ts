@@ -45,23 +45,23 @@ export interface UpdateVote {
     active?: number;
 }
 
-export function isIdValid(value: any) {
+export function isIdValid(value: any): boolean {
     return isId(value);
 }
 
-export function isHeaderValid(value: any) {
+export function isHeaderValid(value: any): boolean {
     return value === null || isInteger(value, 0, MAXIMUM_HEADER_VALUE);
 }
 
-export function isBodyValid(value: any) {
+export function isBodyValid(value: any): boolean {
     return value === null || isText(value, MAXIMUM_BODY_LENGTH);
 }
 
-export function isDescriptionValid(value: any) {
+export function isDescriptionValid(value: any): boolean {
     return value === null || isText(value, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
-export function isActiveValid(value: any) {
+export function isActiveValid(value: any): boolean {
     return isInteger(value, 0, MAXIMUM_ACTIVE_VALUE);
 }
 

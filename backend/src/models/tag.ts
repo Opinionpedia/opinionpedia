@@ -33,15 +33,15 @@ export interface UpdateTag {
     description?: string | null;
 }
 
-export function isIdValid(value: any) {
+export function isIdValid(value: any): boolean {
     return isId(value);
 }
 
-export function isNameValid(value: any) {
+export function isNameValid(value: any): boolean {
     return value === null || isVarchar(value, 1, MAXIMUM_NAME_LENGTH);
 }
 
-export function isDescriptionValid(value: any) {
+export function isDescriptionValid(value: any): boolean {
     return value === null || isText(value, MAXIMUM_DESCRIPTION_LENGTH);
 }
 

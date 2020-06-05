@@ -38,15 +38,15 @@ export interface UpdateOption {
     description: string | null;
 }
 
-export function isIdValid(value: any) {
+export function isIdValid(value: any): boolean {
     return isId(value);
 }
 
-export function isPromptValid(value: any) {
+export function isPromptValid(value: any): boolean {
     return isVarchar(value, 0, MAXIMUM_PROMPT_LENGTH);
 }
 
-export function isDescriptionValid(value: any) {
+export function isDescriptionValid(value: any): boolean {
     return value === null || isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
