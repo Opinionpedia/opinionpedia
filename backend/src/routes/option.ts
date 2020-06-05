@@ -49,7 +49,7 @@ type CreateOptionResBody = { option_id: number; };
 type ModifyOptionReqBody = Partial<model.UpdateOption>;
 type ModifyOptionResBody = null;
 
-export default (router: Router) => {
+export default (router: Router): void => {
     // List options handler
     router.get('/', wrapAsync(async (req, res) => {
         notAvailableInProduction();

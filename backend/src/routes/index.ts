@@ -13,11 +13,9 @@ import setupTag from './tag.js';
 import { development } from '../config.js';
 import { MySQLError } from '../errors.js';
 
-const INVALID_REQUEST_PARAMETERS = 'Invalid request parameters';
-
-const allowedOrigins = {
-    'http://localhost:3000': true,
-};
+//const allowedOrigins = {
+//    'http://localhost:3000': true,
+//};
 
 const allowedHeaders = [
     'authorization',
@@ -124,7 +122,7 @@ function handleNoSuchRoute(
     next();
 }
 
-function setupRoutes(router: Router) {
+function setupRoutes(router: Router): void {
     router.use(cors);
 
     router.use(bodyParser.json());

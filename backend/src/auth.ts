@@ -1,9 +1,7 @@
-import { Request } from 'express';
 import jwt from 'jsonwebtoken';
 
 const JWT_EXPIRATION_TIME = '1 hour';
 
-// FIXME: Change to environment variable / use secret store.
 const secret: jwt.Secret = process.env.JWT_SECRET || 'secret';
 
 /**
@@ -21,10 +19,26 @@ interface JWTPayload {
     sub: number;
 }
 
-function isJWTPayload(obj: any): boolean {
-    return typeof obj.sub === 'string';
-}
+function isJWTPayload(obj: unknown): obj is JWTPayload {
+    if (typeof obj !== 'object') {
+        return false;
+    }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    const obj2 = obj as object;
+
+    if (!('sub' in obj2)) {
+        return false;
+    }
+
+    const obj3 = obj2 as JWTPayload;
+
+    if (!Number.isInteger(obj3.sub)) {
+        return false;
+    }
+
+    return true;
+}
 
 /**
  * Sign the given payload into a JSON Web Token string.
@@ -36,7 +50,8 @@ function isJWTPayload(obj: any): boolean {
  * @returns A Promise with the encoded token
  */
 function sign(
-    payload: object,
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    payload: string | Buffer | object,
     secretOrPrivateKey: jwt.Secret,
     options: jwt.SignOptions
 ): Promise<string> {
@@ -64,9 +79,9 @@ function sign(
  */
 function verify(
     token: string,
-    secretOrPrivateKey: jwt.Secret,
+    secretOrPrivateKey: jwt.Secret | jwt.GetPublicKeyOrSecret,
     options: jwt.VerifyOptions
-): Promise<any> {
+): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
         jwt.verify(token, secretOrPrivateKey, options, (err, payload) => {
             if (err) {
@@ -74,7 +89,7 @@ function verify(
                 return;
             }
 
-            resolve(payload!);
+            resolve(payload as Record<string, unknown>);
         });
     });
 }
@@ -112,10 +127,11 @@ export async function verifyJWT(token: string): Promise<Token | null> {
         const decoded = await verify(token, secret, {});
 
         // Safe cast.
-        if (isJWTPayload(decoded)) {
+        if (!isJWTPayload(decoded)) {
             return null;
         }
-        payload = decoded as JWTPayload;
+
+        payload = decoded;
     } catch (err) {
         return null;
     }

@@ -38,21 +38,21 @@ export interface UpdateOption {
     description: string | null;
 }
 
-export function isIdValid(value: any): boolean {
-    return isId(value);
-}
+export const isIdValid = isId;
 
-export function isPromptValid(value: any): boolean {
+export function isPromptValid(value: unknown): boolean {
     return isVarchar(value, 0, MAXIMUM_PROMPT_LENGTH);
 }
 
-export function isDescriptionValid(value: any): boolean {
+export function isDescriptionValid(value: unknown): boolean {
     return value === null || isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getOptions(conn: Conn): Promise<Option[]> {
     const stmt = SQL`SELECT * FROM option_`;
-    const { results: options } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const options = results.asRows() as Option[];
+
     return options;
 }
 
@@ -60,10 +60,11 @@ export async function getOption(
     conn: Conn,
     id: number
 ): Promise<Option | null> {
-    const sql = SQL`
+    const stmt = SQL`
         SELECT * FROM option_
         WHERE id = ${id}`;
-    const { results: options } = await conn.query(sql);
+    const results = await conn.query(stmt);
+    const options = results.asRows() as Option[];
 
     // Check if the result is found or not.
     if (options.length !== 1) {
@@ -77,10 +78,12 @@ export async function getOptionsByQuestionId(
     conn: Conn,
     question_id: number
 ): Promise<Option[]> {
-    const sql = SQL`
+    const stmt = SQL`
         SELECT * FROM option_
         WHERE question_id = ${question_id}`;
-    const { results: options } = await conn.query(sql);
+    const results = await conn.query(stmt);
+    const options = results.asRows() as Option[];
+
     return options;
 }
 
@@ -100,9 +103,9 @@ export async function createOption(
         INSERT INTO option_ (profile_id, question_id, prompt, description)
         VALUES (${profile_id}, ${question_id}, ${prompt}, ${description})`;
 
-    const { results } = await conn.query(stmt);
+    const results = await conn.query(stmt);
 
-    const id = results.insertId;
+    const id = results.asOk().insertId;
     return id;
 }
 

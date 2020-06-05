@@ -48,7 +48,7 @@ type CreateTagResBody = { tag_id: number; };
 type ModifyTagReqBody = Partial<model.UpdateTag>;
 type ModifyTagResBody = null;
 
-export default (router: Router) => {
+export default (router: Router): void => {
     // List tags handler
     router.get('/', wrapAsync(async (req, res) => {
         const conn = await getConn(req);

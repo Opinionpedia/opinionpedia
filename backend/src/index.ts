@@ -7,13 +7,13 @@ import setupApi from './routes/index.js';
 
 const port = process.env.HTTP_PORT || 4000;
 
-function log(req: Request, res: Response, next: NextFunction) {
+function log(req: Request, res: Response, next: NextFunction): void {
     const { method, path } = req;
     console.log(`${method} ${path}`);
     next();
 }
 
-function send404(req: Request, res: Response) {
+function send404(req: Request, res: Response, next: NextFunction): void {
     if (res.finished) {
         return;
     }
@@ -22,9 +22,11 @@ function send404(req: Request, res: Response) {
     res.sendFile('public/404.html', {
         root: process.cwd(),
     });
+
+    next();
 }
 
-async function main() {
+async function main(): Promise<void> {
     try {
         await runMigrations();
         console.log('Finished setting up database');

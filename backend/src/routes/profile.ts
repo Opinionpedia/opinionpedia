@@ -92,7 +92,7 @@ function getIdOrUsernameParam(id_or_username: string): IdOrUsername {
     return { profile_id, username };
 }
 
-export default (routers: { profile: Router, login: Router }) => {
+export default (routers: { profile: Router, login: Router }): void => {
     // List profiles handler
     routers.profile.get('/', wrapAsync(async (req, res) => {
         notAvailableInProduction();

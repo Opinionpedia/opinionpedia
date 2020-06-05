@@ -1,6 +1,6 @@
 import SQL from 'sql-template-strings';
 
-import { SQLDate, isId, isInteger, isText, isVarchar } from './util.js';
+import { SQLDate, isId, isInteger, isText } from './util.js';
 
 import { Conn } from '../db.js';
 
@@ -45,29 +45,29 @@ export interface UpdateVote {
     active?: number;
 }
 
-export function isIdValid(value: any): boolean {
-    return isId(value);
-}
+export const isIdValid = isId;
 
-export function isHeaderValid(value: any): boolean {
+export function isHeaderValid(value: unknown): boolean {
     return value === null || isInteger(value, 0, MAXIMUM_HEADER_VALUE);
 }
 
-export function isBodyValid(value: any): boolean {
+export function isBodyValid(value: unknown): boolean {
     return value === null || isText(value, MAXIMUM_BODY_LENGTH);
 }
 
-export function isDescriptionValid(value: any): boolean {
+export function isDescriptionValid(value: unknown): boolean {
     return value === null || isText(value, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
-export function isActiveValid(value: any): boolean {
+export function isActiveValid(value: unknown): boolean {
     return isInteger(value, 0, MAXIMUM_ACTIVE_VALUE);
 }
 
 export async function getVotes(conn: Conn): Promise<Vote[]> {
     const stmt = SQL`SELECT * FROM vote`;
-    const { results: votes } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const votes = results.asRows() as Vote[];
+
     return votes;
 }
 
@@ -75,10 +75,11 @@ export async function getVote(
     conn: Conn,
     id: number
 ): Promise<Vote | null> {
-    const sql = SQL`
+    const stmt = SQL`
         SELECT * FROM vote
         WHERE id = ${id}`;
-    const { results: votes } = await conn.query(sql);
+    const results = await conn.query(stmt);
+    const votes = results.asRows() as Vote[];
 
     // Check if the result is found or not.
     if (votes.length !== 1) {
@@ -92,10 +93,12 @@ export async function getVotesByQuestionId(
     conn: Conn,
     question_id: number
 ): Promise<Vote[]> {
-    const sql = SQL`
+    const stmt = SQL`
         SELECT * FROM vote
         WHERE question_id = ${question_id}`;
-    const { results: votes } = await conn.query(sql);
+    const results = await conn.query(stmt);
+    const votes = results.asRows() as Vote[];
+
     return votes;
 }
 
@@ -120,9 +123,9 @@ export async function createVote(
         VALUES (${profile_id}, ${question_id}, ${option_id}, ${header}, ${body},
                 ${description}, ${active})`;
 
-    const { results } = await conn.query(stmt);
+    const results = await conn.query(stmt);
 
-    const id = results.insertId;
+    const id = results.asOk().insertId;
     return id;
 }
 

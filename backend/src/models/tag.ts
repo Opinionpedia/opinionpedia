@@ -33,21 +33,21 @@ export interface UpdateTag {
     description?: string | null;
 }
 
-export function isIdValid(value: any): boolean {
-    return isId(value);
-}
+export const isIdValid = isId;
 
-export function isNameValid(value: any): boolean {
+export function isNameValid(value: unknown): boolean {
     return value === null || isVarchar(value, 1, MAXIMUM_NAME_LENGTH);
 }
 
-export function isDescriptionValid(value: any): boolean {
+export function isDescriptionValid(value: unknown): boolean {
     return value === null || isText(value, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getTags(conn: Conn): Promise<Tag[]> {
     const stmt = SQL`SELECT * FROM tag`;
-    const { results: tags } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const tags = results.asRows() as Tag[];
+
     return tags;
 }
 
@@ -55,10 +55,11 @@ export async function getTag(
     conn: Conn,
     id: number
 ): Promise<Tag | null> {
-    const sql = SQL`
+    const stmt = SQL`
         SELECT * FROM tag
         WHERE id = ${id}`;
-    const { results: tags } = await conn.query(sql);
+    const results = await conn.query(stmt);
+    const tags = results.asRows() as Tag[];
 
     // Check if the result is found or not.
     if (tags.length !== 1) {
@@ -83,9 +84,9 @@ export async function createTag(
         INSERT INTO tag (profile_id, name, description)
         VALUES (${profile_id}, ${name}, ${description})`;
 
-    const { results } = await conn.query(stmt);
+    const results = await conn.query(stmt);
 
-    const id = results.insertId;
+    const id = results.asOk().insertId;
     return id;
 }
 

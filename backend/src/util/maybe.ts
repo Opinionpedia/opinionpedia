@@ -2,9 +2,9 @@
 // undefined.
 export type Maybe<T> = None | T;
 
-export interface None {}
+export class None {}
 
-export const none = {};
+export const none = new None();
 
 export function isNone<T>(maybe: Maybe<T>): maybe is None {
     return maybe === none;

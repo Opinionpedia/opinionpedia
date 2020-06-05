@@ -57,9 +57,30 @@ export const ERR_MYSQL_ROW_IS_REFERENCED = 'ER_ROW_IS_REFERENCED_2';
 export type QueryOptions = mysql.QueryOptions;
 
 export class QueryResults {
-    results?: any;
-    fields?: mysql.FieldInfo[];
+    private results: Ok | Row[];
+    fields: mysql.FieldInfo[];
+
+    constructor(results: Ok | Row[], fields: mysql.FieldInfo[]) {
+        this.results = results;
+        this.fields = fields;
+    }
+
+    asOk(): Ok {
+        return this.results as Ok;
+    }
+
+    asRows(): Row[] {
+        return this.results as Row[];
+    }
 }
+
+// E.g., INSERT statements.
+interface Ok {
+    insertId: number;
+}
+
+// E.g., SELECT statements.
+type Row = unknown;
 
 class Measure {
     private start: number;
@@ -89,9 +110,10 @@ function stringify(query: string | SQLStatement): string {
 
     // Complete hack.
     // SQLStatement.strings is private, so we cast to unknown to get around it.
-    const strings = (query as unknown as any).strings as string[];
 
-    function collapse(s: string) {
+    const strings = (query as unknown as { strings: string[]; }).strings;
+
+    function collapse(s: string): string {
         return s.replace(/\s\s+/g, ' ');
     }
 
@@ -103,13 +125,13 @@ function stringify(query: string | SQLStatement): string {
 // Same type as the mysql.Connection.on() method.
 type MysqlConnectionOnMethod = {
     (ev: 'end', callback: (err?: mysql.MysqlError) => void): mysql.Connection;
-    (ev: 'fields', callback: (fields: any[]) => void): mysql.Connection;
+    (ev: 'fields', callback: (fields: unknown[]) => void): mysql.Connection;
     (ev: 'error', callback: (err: mysql.MysqlError) => void): mysql.Connection;
     (
         ev: 'enqueue',
         callback: (err?: mysql.MysqlError) => void
     ): mysql.Connection;
-    (ev: string, callback: (...args: any[]) => void): mysql.Connection;
+    (ev: string, callback: (...args: unknown[]) => void): mysql.Connection;
 };
 
 /**
@@ -151,7 +173,7 @@ class PromisifiedMySQLConnection {
                     return;
                 }
 
-                resolve({ results, fields });
+                resolve(new QueryResults(results, fields!));
             });
         });
     }
@@ -175,8 +197,6 @@ class PromisifiedMySQLConnection {
  */
 export class Conn {
     private connection: PromisifiedMySQLConnection | null = null;
-
-    constructor() {}
 
     private init(): void {
         const connection = new PromisifiedMySQLConnection(config);
@@ -218,9 +238,9 @@ export class Conn {
         const measure = new Measure();
 
         try {
-            const { results, fields } = await connection.query(options);
+            const results = await connection.query(options);
 
-            return { results, fields };
+            return results;
         } finally {
             const timeTaken = measure.end().toFixed(1);
             const query = stringify(options);
@@ -273,10 +293,10 @@ async function hasMigrationRun(conn: Conn, path: string): Promise<boolean> {
     const stmt = SQL`
         SELECT 1 FROM migrations
         WHERE path = ${path} LIMIT 1`;
-    const { results } = await conn.query(stmt);
+    const results = await conn.query(stmt);
 
     // Check if the result is found or not.
-    return !!results.length;
+    return results.asRows().length > 0;
 }
 
 async function markMigrationDone(conn: Conn, path: string): Promise<void> {

@@ -38,33 +38,33 @@ export interface UpdateProfile {
     body: string | null;
 }
 
-export function isIdValid(value: any): boolean {
-    return isId(value);
-}
+export const isIdValid = isId;
 
-export function isUsernameValid(value: any): boolean {
+export function isUsernameValid(value: unknown): boolean {
     if (!isVarchar(value, 1, MAXIMUM_USERNAME_LENGTH)) {
         return false;
     }
 
     // Usernames can't start with numbers.
-    const isNum = !isNaN(parseInt(value));
+    const isNum = !isNaN(parseInt(value as string));
     return !isNum;
 }
 
 export { isPasswordValid } from '../password.js';
 
-export function isBodyValid(value: any): boolean {
+export function isBodyValid(value: unknown): boolean {
     return value === null || isVarchar(value, 0, MAXIMUM_BODY_LENGTH);
 }
 
-export function isDescriptionValid(value: any): boolean {
+export function isDescriptionValid(value: unknown): boolean {
     return value === null || isVarchar(value, 0, MAXIMUM_DESCRIPTION_LENGTH);
 }
 
 export async function getProfiles(conn: Conn): Promise<Profile[]> {
     const stmt = SQL`SELECT * FROM profile`;
-    const { results: profiles } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const profiles = results.asRows() as Profile[];
+
     return profiles;
 }
 
@@ -75,7 +75,8 @@ export async function getProfile(
     const stmt = SQL`
         SELECT * FROM profile
         WHERE id = ${id}`;
-    const { results: profiles } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const profiles = results.asRows() as Profile[];
 
     // Check if the result is found or not.
     if (profiles.length !== 1) {
@@ -92,7 +93,8 @@ export async function getProfileByUsername(
     const stmt = SQL`
         SELECT * FROM profile
         WHERE username = ${username}`;
-    const { results: profiles } = await conn.query(stmt);
+    const results = await conn.query(stmt);
+    const profiles = results.asRows() as Profile[];
 
     // Check if the result is found or not.
     if (profiles.length !== 1) {
@@ -118,9 +120,9 @@ export async function createProfile(
         INSERT INTO profile (username, password, salt, description, body)
         VALUES (${username}, ${password}, ${salt}, ${description}, ${body})`;
 
-    const { results } = await conn.query(stmt);
+    const results = await conn.query(stmt);
 
-    const id = results.insertId;
+    const id = results.asOk().insertId;
     return id;
 }
 

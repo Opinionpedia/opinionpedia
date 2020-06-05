@@ -12,8 +12,6 @@ import { production } from '../config.js';
 
 import { isId } from '../models/util.js';
 
-import { Maybe, isNone, none } from '../util/maybe.js';
-
 /**
  * Route unavailable except when development mode is opted into.
  */
@@ -29,7 +27,11 @@ export function notAvailableInProduction(): void {
  * they have a chance to handle it.
  */
 export function wrapAsync(fn: RequestHandler): RequestHandler {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
         try {
             await fn(req, res, next);
         } catch (err) {
@@ -47,7 +49,7 @@ export function wrapAsync(fn: RequestHandler): RequestHandler {
  * @param value - Express HTTP request parameter value
  * @param convert - Function to typecast the parameter from string
  * @param validate - How to validate the value of the parameter
- * @returns The value of the HTTP parameter or none if invalid
+ * @returns The value of the HTTP parameter or null if invalid
  */
 export function getParam<T>(
     param: string | undefined,
@@ -95,7 +97,7 @@ export function asString(value: string | undefined): string | null {
  * Get and validate a database id from an Express HTTP request parameter.
  *
  * @param value - Express HTTP request parameter value
- * @returns The value of the id or none if invalid
+ * @returns The value of the id or null if invalid
  */
 export function getIdParam(value: string | undefined): number | null {
     return getParam(value, asNumber, isId);
@@ -110,25 +112,7 @@ export function validateIdParam(value: string | undefined): number {
     return id;
 }
 
-type BodyValidator = (value: any) => boolean;
-
-/**
- * Get a property from the body of an Express HTTP request if present.
- *
- * @param value - The Express HTTP body property value
- * @param validate - How to validate the value of the property
- * @returns The value of the body property or none if invalid
- */
-export function getBodyProp<T>(
-    value: any,
-    validate: BodyValidator
-): Maybe<T> {
-    if (!validate(value)) {
-        return none;
-    }
-
-    return value as T;
-}
+type BodyValidator = (value: unknown) => boolean;
 
 function getBodyProps<BodyProperties>(
     body: any,
@@ -137,7 +121,7 @@ function getBodyProps<BodyProperties>(
     const bodyProperties: any = {};
 
     for (const key in validators) {
-        const value: any = body[key];
+        const value: unknown = body[key];
 
         const validator = validators[key];
 
@@ -171,7 +155,7 @@ function getPartialBodyProps<BodyProperties>(
     const bodyProperties: any = {};
 
     for (const key in validators) {
-        const value: any = body[key];
+        const value: unknown = body[key];
 
         // Okay if a property is missing.
         if (value === undefined) {

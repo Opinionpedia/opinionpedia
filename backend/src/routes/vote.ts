@@ -53,7 +53,7 @@ type CreateVoteResBody = { vote_id: number; };
 type ModifyVoteReqBody = Partial<model.UpdateVote>;
 type ModifyVoteResBody = null;
 
-export default (router: Router) => {
+export default (router: Router): void => {
     // List votes handler
     router.get('/', wrapAsync(async (req, res) => {
         notAvailableInProduction();

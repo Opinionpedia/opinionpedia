@@ -43,6 +43,7 @@ export class HTTP500InternalServerError extends HTTPError {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class HTTP501NotImplementedError extends HTTPError {
     constructor(message?: string) {
         super(message);
@@ -51,27 +52,11 @@ class HTTP501NotImplementedError extends HTTPError {
     }
 }
 
-class HTTP502BadGatewayError extends HTTPError {
-    constructor(message?: string) {
-        super(message);
-        this.statusCode = 502;
-        this.statusMessage = 'Bad Gateway';
-    }
-}
-
 class HTTP503ServiceNotAvailableError extends HTTPError {
     constructor(message?: string) {
         super(message);
         this.statusCode = 503;
         this.statusMessage = 'Service Not Available';
-    }
-}
-
-class HTTP504GatewayTimeoutError extends HTTPError {
-    constructor(message?: string) {
-        super(message);
-        this.statusCode = 504;
-        this.statusMessage = 'Gateway Timeout';
     }
 }
 

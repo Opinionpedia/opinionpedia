@@ -18,6 +18,11 @@ jobs:
       with:
         node-version: 12.x
 
+    - name: Lint the backend server
+      run: |
+        cd backend
+        yarn lint
+
     - name: Build the backend server
       run: |
         cd backend

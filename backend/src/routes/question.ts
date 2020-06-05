@@ -13,8 +13,6 @@ import { getConn } from './db.js';
 
 import {
     NotOwnerError,
-    ReferencedResourceNotFound,
-    ResourceAlreadyExistsDBError,
     ResourceNotFoundError,
 } from './errors.js';
 
@@ -46,7 +44,7 @@ type CreateQuestionResBody = { question_id: number; };
 type ModifyQuestionReqBody = Partial<model.UpdateQuestion>;
 type ModifyQuestionResBody = null;
 
-export default (router: Router) => {
+export default (router: Router): void => {
     // List questions handler
     router.get('/', wrapAsync(async (req, res) => {
         notAvailableInProduction();
