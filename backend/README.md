@@ -650,3 +650,142 @@ Request body: {
     "active": 4
 }
 ```
+
+
+
+List tags
+---------
+
+Get details for all tags.
+
+```
+Method: GET
+Path: /tag
+Response body: {
+    id: number;
+    profile_id: number;
+    name: string;
+    description: string | null;
+    created: string;
+    updated: string;
+}[]
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag
+Response body: [{
+    "id": 1,
+    "profile_id": 123,
+    "name": "Name for tag 1",
+    "description": "Description for tag 1",
+    "created": "2020-03-31T07:00:00.000Z",
+    "updated": "2020-03-31T07:00:00.000Z"
+}]
+```
+
+
+
+Detail tag
+-----------
+
+Get details for a tag.
+
+```
+Method: GET
+Path: /tag/:tag_id
+Params: {
+    "tag_id": number;
+}
+Response body: {
+    id: number;
+    profile_id: number;
+    name: string;
+    description: string | null;
+    created: string;
+    updated: string;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag/1
+Response body: {
+    "id": 1,
+    "profile_id": 123,
+    "name": "Name for tag 1",
+    "description": "Description for tag 1",
+    "created": "2020-03-31T07:00:00.000Z",
+    "updated": "2020-03-31T07:00:00.000Z"
+}
+```
+
+
+
+Create tag
+-----------
+
+Create a tag.
+
+```
+Method: POST
+Path: /tag
+Headers: {
+    Authorization: string;
+}
+Request body: {
+    name: string;
+    description: string | null;
+}
+Response body: {
+    tag_id: number;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag
+Headers: {
+    "Authorization": "Bearer my.jwt.here"
+}
+Request body: {
+    "name": "My name for tag",
+    "description": null
+}
+Response body: {
+    "tag_id": 1
+}
+```
+
+
+Modify tag
+-----------
+
+Update a tag. Only fields included in request body are modified.
+
+```
+Method: PATCH
+Path: /tag/:tag_id
+Headers: {
+    Authorization: string;
+}
+Request body: {
+    name: string | undefined;
+    description: string | null | undefined;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag/456
+Headers: {
+    "Authorization": "Bearer my.jwt.here"
+}
+Request body: {
+    "description": null
+}
+```
