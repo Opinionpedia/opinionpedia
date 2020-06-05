@@ -149,6 +149,9 @@ Table of contents
   - [Detail tag](#detail-tag)
   - [Create tag](#create-tag)
   - [Modify tag](#modify-tag)
+- Profile tags
+  - [List tags on profile](#list-tags-on-profile)
+  - [Create profile tag](#create-profile-tag)
 
 
 
@@ -792,5 +795,66 @@ Headers: {
 }
 Request body: {
     "description": null
+}
+```
+
+
+
+List tags on profile
+--------------------
+
+Get list of tags on a profile.
+
+```
+Method: GET
+Path: /tag/profile/:profile_id
+Params: {
+    profile_id: number;
+}
+Response body: {
+    tag_id: number;
+    name: string;
+    description: string | null;
+}[]
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag/profile/123
+Response body: [{
+    "tag_id": 456,
+    "name": "Man",
+    "description": "Identifies as man",
+}]
+```
+
+
+Create profile tag
+------------------
+
+Adds a tag to the current profile. The current profile is implied via the
+JWT in the Authorization header.
+
+```
+Method: POST
+Path: /vote
+Headers: {
+    Authorization: string;
+}
+Request body: {
+    tag_id: number;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/vote
+Headers: {
+    Authorization: "Bearer my.jwt.here"
+}
+Request body: {
+    "tag_id": 456,
 }
 ```
