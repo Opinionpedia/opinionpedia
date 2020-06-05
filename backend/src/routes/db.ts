@@ -38,8 +38,8 @@ async function closeConn(conn: Conn): Promise<void> {
         await conn.end();
     } catch (err) {
         // Since this function is executed after an HTTP response has been
-        // sent, so we cannot send any information to the browser that
-        // something strange happened. Just log the error.
+        // sent, we cannot send any information to the browser that something
+        // strange happened. Just log the error.
         console.error(err);
     }
 }
