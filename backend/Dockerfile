@@ -5,10 +5,10 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-# Build
+# Lint and build
 COPY src src
-COPY tsconfig.json ./
-RUN yarn build
+COPY .eslintrc.json tsconfig.json ./
+RUN yarn lint && yarn build
 
 # Run
 COPY public public
