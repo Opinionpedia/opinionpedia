@@ -50,7 +50,7 @@ type DetailVoteResBody = model.Vote;
 type CreateVoteReqBody = Omit<model.CreateVote, 'profile_id'>;
 type CreateVoteResBody = { vote_id: number; };
 
-type ModifyVoteReqBody = Partial<model.UpdateVote>;
+type ModifyVoteReqBody = Partial<Omit<model.UpdateVote, 'id'>>;
 type ModifyVoteResBody = null;
 
 export default (router: Router): void => {

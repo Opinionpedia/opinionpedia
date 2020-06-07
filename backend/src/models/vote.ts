@@ -39,10 +39,10 @@ export interface CreateVote {
 export interface UpdateVote {
     id: number;
 
-    header?: number | null;
-    body?: string | null;
-    description?: string | null;
-    active?: number;
+    header: number | null;
+    body: string | null;
+    description: string | null;
+    active: number;
 }
 
 export const isIdValid = isId;

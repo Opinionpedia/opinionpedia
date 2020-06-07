@@ -53,7 +53,7 @@ type CreateProfileResBody = {
     token: string;
 };
 
-type ModifyProfileReqBody = Partial<model.UpdateProfile>;
+type ModifyProfileReqBody = Partial<Omit<model.UpdateProfile, 'id'>>;
 type ModifyProfileResBody = null;
 
 type LoginReqBody = {
