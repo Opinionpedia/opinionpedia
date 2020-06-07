@@ -7,6 +7,10 @@ import { Conn } from '../db.js';
 const MAXIMUM_NAME_LENGTH = 100;
 const MAXIMUM_DESCRIPTION_LENGTH = 3000;
 
+const VALID_CATEGORIES = {
+    identity: true,
+};
+
 export interface Tag {
     id: number;
 
@@ -14,6 +18,8 @@ export interface Tag {
 
     name: string;
     description: string | null;
+
+    category: string | null;
 
     created: SQLDate;
     updated: SQLDate;
@@ -24,13 +30,15 @@ export interface CreateTag {
 
     name: string;
     description: string | null;
+
+    category: string | null;
 }
 
 export interface UpdateTag {
     id: number;
 
-    name?: string;
-    description?: string | null;
+    name: string;
+    description: string | null;
 }
 
 export const isIdValid = isId;
@@ -41,6 +49,11 @@ export function isNameValid(value: unknown): boolean {
 
 export function isDescriptionValid(value: unknown): boolean {
     return value === null || isText(value, MAXIMUM_DESCRIPTION_LENGTH);
+}
+
+export function isCategoryValid(value: unknown): boolean {
+    return value === null ||
+        (typeof value === 'string' && value in VALID_CATEGORIES);
 }
 
 export async function getTags(conn: Conn): Promise<Tag[]> {
@@ -78,11 +91,13 @@ export async function createTag(
 
         name,
         description,
+
+        category,
     } = tag;
 
     const stmt = SQL`
-        INSERT INTO tag (profile_id, name, description)
-        VALUES (${profile_id}, ${name}, ${description})`;
+        INSERT INTO tag (profile_id, name, description, category)
+        VALUES (${profile_id}, ${name}, ${description}, ${category})`;
 
     const results = await conn.query(stmt);
 

@@ -112,6 +112,9 @@ CREATE TABLE tag (
     name          VARCHAR(100) NOT NULL,
     description   TEXT,
 
+    # Valid values are NULL and "identity".
+    category      VARCHAR(20),
+
     created       DATETIME NOT NULL
                       DEFAULT CURRENT_TIMESTAMP,
     updated       DATETIME NOT NULL

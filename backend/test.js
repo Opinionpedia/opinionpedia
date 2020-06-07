@@ -294,6 +294,7 @@ async function test() {
 
     log(await get(200, { path: '/tag' }));
 
+    // Tag with 'identity' category.
     res = await post(200, {
         path: '/tag',
         token,
@@ -301,10 +302,37 @@ async function test() {
             profile_id,
             name: `Name for ${tagName}`,
             description: `Description for ${tagName}`,
+            category: 'identity',
         },
     });
     log(res);
     const { tag_id } = res.json;
+
+    // Tag with null category.
+    const tagName2 = 'tag-' + randomNumber();
+    log(await post(200, {
+        path: '/tag',
+        token,
+        body: {
+            profile_id,
+            name: `Name for ${tagName2}`,
+            description: `Description for ${tagName2}`,
+            category: null,
+        },
+    }));
+
+    // Tag with invalid category.
+    const tagName3 = 'tag-' + randomNumber();
+    log(await post(400, {
+        path: '/tag',
+        token,
+        body: {
+            profile_id,
+            name: `Name for ${tagName2}`,
+            description: `Description for ${tagName2}`,
+            category: 'invalid',
+        },
+    }));
 
     log(await get(200, { path: `/tag/${tag_id}`}));
 

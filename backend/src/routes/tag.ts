@@ -45,7 +45,7 @@ type DetailTagResBody = model.Tag;
 type CreateTagReqBody = Omit<model.CreateTag, 'profile_id'>;
 type CreateTagResBody = { tag_id: number; };
 
-type ModifyTagReqBody = Partial<model.UpdateTag>;
+type ModifyTagReqBody = Partial<Omit<model.UpdateTag, | 'tag_id'>>;
 type ModifyTagResBody = null;
 
 export default (router: Router): void => {
@@ -76,11 +76,13 @@ export default (router: Router): void => {
         const {
             name,
             description,
+            category,
         } = validateBodyProps<CreateTagReqBody>(
             req.body,
             {
                 name: model.isNameValid,
                 description: model.isDescriptionValid,
+                category: model.isCategoryValid,
             }
         );
 
@@ -94,6 +96,7 @@ export default (router: Router): void => {
                 profile_id,
                 name,
                 description,
+                category,
             });
         } catch (err) {
             if (err.code === ERR_MYSQL_DUP_ENTRY) {
