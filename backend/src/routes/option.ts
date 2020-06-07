@@ -46,7 +46,10 @@ type DetailOptionResBody = model.Option;
 type CreateOptionReqBody = Omit<model.CreateOption, 'profile_id'>;
 type CreateOptionResBody = { option_id: number; };
 
-type ModifyOptionReqBody = Partial<Omit<model.UpdateOption, 'id'>>;
+type ModifyOptionReqBody = Omit<
+    model.UpdateOption,
+    'id' | 'profile_id' | 'question_id'
+>;
 type ModifyOptionResBody = null;
 
 export default (router: Router): void => {

@@ -151,7 +151,7 @@ export function validateBodyProps<BodyProperties>(
 function getPartialBodyProps<BodyProperties>(
     body: any,
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
-): BodyProperties | null {
+): Partial<BodyProperties> | null {
     const bodyProperties: any = {};
 
     for (const key in validators) {
@@ -172,13 +172,13 @@ function getPartialBodyProps<BodyProperties>(
         bodyProperties[key] = value;
     }
 
-    return bodyProperties as BodyProperties;
+    return bodyProperties as Partial<BodyProperties>;
 }
 
 export function validatePartialBodyProps<BodyProperties>(
     body: any,
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
-): BodyProperties {
+): Partial<BodyProperties> {
     const props = getPartialBodyProps(body, validators);
     if (props === null) {
         throw new InvalidParametersError();

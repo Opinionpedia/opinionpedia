@@ -41,7 +41,7 @@ type DetailQuestionResBody = model.Question;
 type CreateQuestionReqBody = Omit<model.CreateQuestion, 'profile_id'>;
 type CreateQuestionResBody = { question_id: number; };
 
-type ModifyQuestionReqBody = Partial<Omit<model.UpdateQuestion, 'id'>>;
+type ModifyQuestionReqBody = Omit<model.UpdateQuestion, 'id' | 'profile_id'>;
 type ModifyQuestionResBody = null;
 
 export default (router: Router): void => {

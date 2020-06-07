@@ -53,7 +53,7 @@ type CreateProfileResBody = {
     token: string;
 };
 
-type ModifyProfileReqBody = Partial<Omit<model.UpdateProfile, 'id'>>;
+type ModifyProfileReqBody = Omit<model.UpdateProfile, 'id'>;
 type ModifyProfileResBody = null;
 
 type LoginReqBody = {
@@ -227,7 +227,7 @@ export default (routers: { profile: Router, login: Router }): void => {
         const {
             username,
             password,
-        } = validatePartialBodyProps<LoginReqBody>(
+        } = validateBodyProps<LoginReqBody>(
             req.body,
             {
                 username: model.isUsernameValid,

@@ -45,7 +45,7 @@ type DetailTagResBody = model.Tag;
 type CreateTagReqBody = Omit<model.CreateTag, 'profile_id'>;
 type CreateTagResBody = { tag_id: number; };
 
-type ModifyTagReqBody = Partial<Omit<model.UpdateTag, | 'tag_id'>>;
+type ModifyTagReqBody = Omit<model.UpdateTag, 'id'>;
 type ModifyTagResBody = null;
 
 export default (router: Router): void => {
