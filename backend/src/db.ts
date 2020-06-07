@@ -222,6 +222,10 @@ export class Conn {
                 this.connection = null;
 
                 if (err.code === 'ECONNREFUSED' && attempts > 1) {
+                    console.log(
+                        `MySQL connection refused, retrying for ` +
+                        `${0.5 * (attempts-1)} more seconds...`);
+
                     attempts -= 1;
                     await wait(500);
                     continue;
