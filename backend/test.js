@@ -330,6 +330,18 @@ async function test() {
     }));
 
     log(await get(200, { path: `/tag/profile/${profile_id}`}));
+
+    console.log('====================');
+    console.log('TESTING QUESTION TAG');
+    console.log('====================');
+
+    log(await post(200, {
+        path: '/tag/question',
+        token,
+        body: { tag_id, question_id },
+    }));
+
+    log(await get(200, { path: `/tag/question/${question_id}`}));
 }
 
 test();

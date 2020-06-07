@@ -161,6 +161,9 @@ Table of contents
 - Profile tags
   - [List tags on profile](#list-tags-on-profile)
   - [Create profile tag](#create-profile-tag)
+- Question tags
+  - [List tags on question](#list-tags-on-question)
+  - [Create question tag](#create-question-tag)
 
 
 
@@ -834,7 +837,7 @@ URL: http://localhost:4000/api/tag/profile/123
 Response body: [{
     "tag_id": 456,
     "name": "Man",
-    "description": "Identifies as man",
+    "description": "Identifies as man"
 }]
 ```
 
@@ -864,6 +867,70 @@ Headers: {
     Authorization: "Bearer my.jwt.here"
 }
 Request body: {
+    "tag_id": 456
+}
+```
+
+
+
+List tags on question
+---------------------
+
+Get list of tags on a question.
+
+```
+Method: GET
+Path: /tag/question/:question_id
+Params: {
+    question_id: number;
+}
+Response body: {
+    tag_id: number;
+    name: string;
+    description: string | null;
+}[]
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag/question/123
+Response body: [{
     "tag_id": 456,
+    "name": "Man",
+    "description": "Identifies as man"
+}]
+```
+
+
+Create question tag
+-------------------
+
+Adds a tag to a question.
+
+Any user can tag a question, but they must be logged in.
+
+```
+Method: POST
+Path: /vote
+Headers: {
+    Authorization: string;
+}
+Request body: {
+    tag_id: number;
+    question_id: number;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/vote
+Headers: {
+    Authorization: "Bearer my.jwt.here"
+}
+Request body: {
+    "tag_id": 456,
+    "question_id": 123
 }
 ```

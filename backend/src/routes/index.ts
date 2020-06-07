@@ -10,6 +10,7 @@ import setupOption from './option.js';
 import setupVote from './vote.js';
 import setupTag from './tag.js';
 import setupProfileTag from './profile_tag.js';
+import setupQuestionTag from './question_tag.js';
 
 import { development } from '../config.js';
 import { MySQLError } from '../errors.js';
@@ -141,6 +142,7 @@ function setupRoutes(router: Router): void {
     const vote = express.Router();
     const tag = express.Router();
     const profileTag = express.Router();
+    const questionTag = express.Router();
 
     router.use('/profile', profile);
     router.use('/login', login);
@@ -149,6 +151,7 @@ function setupRoutes(router: Router): void {
     router.use('/vote', vote);
     router.use('/tag', tag);
     router.use('/tag/profile', profileTag);
+    router.use('/tag/question', questionTag);
 
     setupProfile({ profile, login });
     setupQuestion(question);
@@ -156,6 +159,7 @@ function setupRoutes(router: Router): void {
     setupVote(vote);
     setupTag(tag);
     setupProfileTag(profileTag);
+    setupQuestionTag(questionTag);
 
     router.use(handleNoSuchRoute);
 
