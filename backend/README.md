@@ -36,7 +36,7 @@ Create a file in this directory called ".env" and populate it like this:
 
 ```
 HTTP_PORT=4000
-JWT_SECRET=secret
+JWT_SECRET=mysecret
 DB_HOST=localhost
 DB_USER=myuser
 DB_PASSWORD=mypassword
