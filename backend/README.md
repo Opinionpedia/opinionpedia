@@ -115,6 +115,15 @@ Deployment
 
 
 
+Development
+===========
+
+Run the linter with `yarn lint` before pushing. GitHub is set to run the linter
+and try building the project in its CI, so it will notice if lint has any
+errors.
+
+
+
 API
 ===
 
