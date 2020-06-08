@@ -82,9 +82,9 @@ INSERT INTO question (id, profile_id, prompt, description)
 		(46, 5, 'Is Donald Trump a good US president?', 'How does the world see US president Donald Trump today, would you consider him good or bad?');
 
 INSERT INTO option_ (id, profile_id, question_id, prompt, description)
- VALUES (1, 5, 1, "Yes", NULL),
-		(2, 5, 1, "No", NULL),
-		(3, 5, 1, "Not Sure", NULL),
+ VALUES (1, 5, 46, "Yes", NULL),
+		(2, 5, 46, "No", NULL),
+		(3, 5, 46, "Not Sure", NULL),
 		(4, 5, 2, "Yes", NULL),
 		(5, 5, 2, "No", NULL),
 		(6, 5, 2, "Not Sure", NULL),
@@ -725,4 +725,3 @@ INSERT INTO question_tag (tag_id, question_id)
 		(31, 44),
 		(31, 45),
 		(31, 46);
-
