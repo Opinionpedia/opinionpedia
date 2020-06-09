@@ -34,12 +34,10 @@ export function wrapAsync(fn: RequestHandler): RequestHandler {
     ): Promise<void> => {
         try {
             await fn(req, res, next);
+            next();
         } catch (err) {
             next(err);
-            return;
         }
-
-        next();
     };
 }
 

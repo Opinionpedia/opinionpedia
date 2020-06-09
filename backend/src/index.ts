@@ -14,7 +14,7 @@ function log(req: Request, res: Response, next: NextFunction): void {
 }
 
 function send404(req: Request, res: Response, next: NextFunction): void {
-    if (res.finished) {
+    if (req.complete) {
         return;
     }
 

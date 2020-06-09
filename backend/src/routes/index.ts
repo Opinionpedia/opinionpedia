@@ -53,6 +53,22 @@ function cors(req: Request, res: Response, next: NextFunction): void {
     next();
 }
 
+function handleNoSuchRoute(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
+    if (!req.complete) {
+        console.error('Route not found');
+
+        res.status(400);
+        res.type('txt');
+        res.send('Route not found');
+    }
+
+    next();
+}
+
 function handleMySQLError(
     err: Error,
     req: Request,
@@ -96,7 +112,7 @@ function handleUnknownError(
     next: NextFunction
 ): void {
     console.error(err);
-    console.error(`HTTP 500 Internal Server Error`);
+    console.error('HTTP 500 Internal Server Error');
 
     if (development) {
         res.status(500);
@@ -106,25 +122,6 @@ function handleUnknownError(
     } else {
         res.sendStatus(500);
     }
-
-    next();
-}
-
-function handleNoSuchRoute(
-    req: Request,
-    res: Response,
-    next: NextFunction
-): void {
-    if (res.finished) {
-        next();
-        return;
-    }
-
-    console.error('Route not found');
-
-    res.status(400);
-    res.type('txt');
-    res.send('Route not found');
 
     next();
 }
