@@ -438,7 +438,7 @@ Example:
 
 Suppose the database has the following data in it at the time of a call:
 
-- Suppose question 1 has two option with ids 10 and 20.
+- Suppose question 1 has two options with ids 10 and 20.
 - Suppose option 10 has three votes, one of which is by a profile tagged
   with tag\_ids 100 and 200, and the other two of which have no tags.
 - Suppose option 20 has five votes, each by profiles tagged with tag\_ids 300
