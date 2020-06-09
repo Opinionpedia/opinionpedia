@@ -143,6 +143,7 @@ Table of contents
   - [Detail question](#detail-question)
   - [Create question](#create-question)
   - [Modify question](#modify-question)
+  - [Get vote table](#get-vote-table)
 - Options
   - [List options](#list-options)
   - [List options on question](#list-options-on-question)
@@ -412,6 +413,50 @@ req.params: {
 req.body: {
     "prompt": "My new prompt",           // optional
     "description": "My new description"  // optional
+}
+```
+
+
+
+Get vote table
+--------------
+
+Produces a 2-D array of vote count statistics on a question.
+
+Within the 2-D array, the outer index is option\_id and the inner index is a
+tag\_id.
+
+After using this call, you will need to [fetch tag details](#detail-tag) to
+learn the names of these tags.
+
+```
+Method: GET
+Path: /question/:question_id/vote_table
+```
+
+Example:
+
+Suppose the database has the following data in it at the time of a call:
+
+- Suppose question 1 has two option with ids 10 and 20.
+- Suppose option 10 has three votes, one of which is by a profile tagged
+  with tag\_ids 100 and 200, and the other two of which have no tags.
+- Suppose option 20 has five votes, each by profiles tagged with tag\_ids 300
+  and 400.
+
+```
+URL: http://localhost:4000/api/question/1/vote_table
+Request body: {
+    "10": {
+        total: 2,
+        "100": 4,
+        "200": 4
+    },
+    "20": {
+        total: 5,
+        "300": 5,
+        "400": 5
+    }
 }
 ```
 

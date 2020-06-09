@@ -158,10 +158,6 @@ async function test() {
 
     log(await get(200, { path: '/profile' }));
 
-    log(await get(200, { path: '/profile/1' }));
-
-    log(await get(200, { path: '/profile/pdm' }));
-
     const username = 'testuser-' + randomNumber();
     let password = 'password';
     res = await post(200, {
@@ -183,6 +179,9 @@ async function test() {
     log(await patch(200, { path: '/profile', token, body: { password }}));
 
     log(await post(200, { path: '/login', body: { username, password }}));
+
+    log(await get(200, { path: `/profile/${profile_id}` }));
+    log(await get(200, { path: `/profile/${username}` }));
 
     console.log('================');
     console.log('TESTING QUESTION');
@@ -244,8 +243,6 @@ async function test() {
     }));
 
     log(await get(200, { path: `/option/${option_id}` }));
-
-    log(await get(200, { path: `/option/question/${question_id}` }));
 
     console.log('============');
     console.log('TESTING VOTE');
@@ -370,6 +367,12 @@ async function test() {
     }));
 
     log(await get(200, { path: `/tag/question/${question_id}`}));
+
+    console.log('==================');
+    console.log('TESTING VOTE TABLE');
+    console.log('==================');
+
+    log(await get(200, { path: `/question/${question_id}/vote_table` }));
 }
 
 test();

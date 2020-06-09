@@ -1,10 +1,12 @@
 //
 // The endpoint are:
 //
-// List     GET   /api/question
-// Details  GET   /api/question/:question_id
-// Create   POST  /api/question
-// Modify   PATCH /api/question/:question_id
+// List      GET   /api/question
+// Details   GET   /api/question/:question_id
+// Create    POST  /api/question
+// Modify    PATCH /api/question/:question_id
+//
+// VoteTable GET   /api/question/:question_id/vote_table
 //
 
 import { Router } from 'express';
@@ -27,6 +29,7 @@ import {
 
 import { ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 
+import * as voteTable from '../models/vote_table.js';
 import * as model from '../models/question.js';
 
 //
@@ -43,6 +46,9 @@ type CreateQuestionResBody = { question_id: number; };
 
 type ModifyQuestionReqBody = Omit<model.UpdateQuestion, 'id' | 'profile_id'>;
 type ModifyQuestionResBody = null;
+
+type VoteTableReqBody = null;
+type VoteTableResBody = voteTable.VoteTable;
 
 export default (router: Router): void => {
     // List questions handler
@@ -147,5 +153,21 @@ export default (router: Router): void => {
         await model.updateQuestion(conn, question);
 
         res.sendStatus(200);
+    }));
+
+    // Get vote table handler
+    router.get('/:question_id/vote_table', wrapAsync(async (req, res) => {
+        const question_id = validateIdParam(req.params.question_id);
+
+        const conn = await getConn(req);
+        const question = await model.getQuestion(conn, question_id);
+        if (question === null) {
+            throw new ResourceNotFoundError();
+        }
+
+        const table: VoteTableResBody =
+            await voteTable.getVoteTable(conn, question_id);
+
+        res.json(table);
     }));
 };
