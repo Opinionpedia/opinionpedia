@@ -449,8 +449,8 @@ URL: http://localhost:4000/api/question/1/vote_table
 Request body: {
     "10": {
         total: 2,
-        "100": 4,
-        "200": 4
+        "100": 1,
+        "200": 1
     },
     "20": {
         total: 5,
