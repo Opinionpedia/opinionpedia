@@ -432,6 +432,12 @@ learn the names of these tags.
 ```
 Method: GET
 Path: /question/:question_id/vote_table
+Response body: {
+    [option_id: string]: {
+        total: number;
+        [tag_id: string]: number;
+    };
+}
 ```
 
 Example:
