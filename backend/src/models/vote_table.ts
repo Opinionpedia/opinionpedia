@@ -89,7 +89,7 @@ async function countVotesByOptionIdOnQuestion(
                option_id
         FROM vote
         WHERE vote.question_id = ${question_id}
-        GROUP BY vote.option_id;`;
+        GROUP BY vote.option_id`;
     const results = await conn.query(stmt);
     const counts = results.asRows() as OptionVoteCounts;
 
@@ -102,16 +102,12 @@ async function countVotesByProfileTagOnOption(
 ): Promise<TagIdVoteCounts> {
     const stmt = SQL`
         SELECT COUNT(1) AS count,
-               tag.id as tag_id
-        FROM profile
+               profile_tag.tag_id as tag_id
+        FROM vote
              JOIN
-             profile_tag ON profile.id = profile_tag.profile_id
-             JOIN
-             tag ON tag.id = profile_tag.tag_id
-             JOIN
-             vote ON vote.profile_id = profile.id
+             profile_tag ON profile_tag.profile_id = vote.profile_id
         WHERE vote.option_id = ${option_id}
-        GROUP BY profile_tag.tag_id;`;
+        GROUP BY profile_tag.tag_id`;
     const results = await conn.query(stmt);
     const counts = results.asRows() as TagIdVoteCounts;
 
