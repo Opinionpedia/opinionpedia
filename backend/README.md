@@ -449,12 +449,13 @@ Suppose the database has the following data in it at the time of a call:
   with tag\_ids 100 and 200, and the other two of which have no tags.
 - Suppose option 20 has five votes, each by profiles tagged with tag\_ids 300
   and 400.
+- Suppose option 30 has no votes.
 
 ```
 URL: http://localhost:4000/api/question/1/vote_table
 Request body: {
     "10": {
-        total: 2,
+        total: 3,
         "100": 1,
         "200": 1
     },
@@ -465,8 +466,6 @@ Request body: {
     }
 }
 ```
-
-Notice that option 30 does not show up because it had no votes.
 
 
 
