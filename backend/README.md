@@ -143,6 +143,7 @@ Table of contents
   - [Detail question](#detail-question)
   - [Create question](#create-question)
   - [Modify question](#modify-question)
+  - [Get question suggestions](#get-question-suggestions)
   - [Get vote table](#get-vote-table)
 - Options
   - [List options](#list-options)
@@ -418,6 +419,49 @@ req.body: {
 
 
 
+Get question suggestions
+------------------------
+
+Get a list of up to three questions with tags similar to the chosen question.
+The questions are purposefully selected with an element of randomness, so
+repeated calls to this route may produce different responses for the same
+inputs.
+
+The algorithm used to select the questions is the following:
+
+1. Create an empty list of question suggestions.
+2. Get the list of question tags on the requested question.
+3. Search the database for other questions with all of those same tags. Add
+   those to the list.
+4. If the list has three or more items, pick 3 at random and return.
+5. Repeat steps 3 and 4, but search for questions with all but one of the tags.
+6. Repeat steps 3 and 4, but search for questions with all but two of the tags.
+7. Etc, until we run out of tags. Return what we have at the end.
+
+```
+Method: GET
+Path: /api/question/:question_id/suggestions
+Params: {
+    question_id: number;
+}
+Response body: number[];
+Possible errors:
+  - HTTP 404: Resource not found
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/question/123/suggestions
+Response body: [
+    1072,
+    12,
+    889
+]
+```
+
+
+
 Get vote table
 --------------
 
@@ -438,6 +482,8 @@ Response body: {
         [tag_id: string]: number;
     };
 }
+Possible errors:
+  - HTTP 404: Resource not found
 ```
 
 Example:
@@ -453,7 +499,7 @@ Suppose the database has the following data in it at the time of a call:
 
 ```
 URL: http://localhost:4000/api/question/1/vote_table
-Request body: {
+Response body: {
     "10": {
         total: 3,
         "100": 1,

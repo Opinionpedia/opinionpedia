@@ -368,6 +368,12 @@ async function test() {
 
     log(await get(200, { path: `/tag/question/${question_id}`}));
 
+    console.log('===================');
+    console.log('TESTING SUGGESTIONS');
+    console.log('===================');
+
+    log(await get(200, { path: `/question/${question_id}/suggestions` }));
+
     console.log('==================');
     console.log('TESTING VOTE TABLE');
     console.log('==================');

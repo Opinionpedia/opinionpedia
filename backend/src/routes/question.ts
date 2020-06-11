@@ -1,12 +1,13 @@
 //
 // The endpoint are:
 //
-// List      GET   /api/question
-// Details   GET   /api/question/:question_id
-// Create    POST  /api/question
-// Modify    PATCH /api/question/:question_id
+// List        GET   /api/question
+// Details     GET   /api/question/:question_id
+// Create      POST  /api/question
+// Modify      PATCH /api/question/:question_id
 //
-// VoteTable GET   /api/question/:question_id/vote_table
+// Suggestions GET   /api/question/:question_id/suggestions
+// VoteTable   GET   /api/question/:question_id/vote_table
 //
 
 import { Router } from 'express';
@@ -29,8 +30,9 @@ import {
 
 import { ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 
-import * as voteTable from '../models/vote_table.js';
 import * as model from '../models/question.js';
+import * as suggestions from '../models/suggestions.js';
+import * as voteTable from '../models/vote_table.js';
 
 //
 // Request body types
@@ -46,6 +48,9 @@ type CreateQuestionResBody = { question_id: number; };
 
 type ModifyQuestionReqBody = Omit<model.UpdateQuestion, 'id' | 'profile_id'>;
 type ModifyQuestionResBody = null;
+
+type SuggestionsReqBody = null;
+type SuggestionsResBody = suggestions.SuggestedQuestionIds;
 
 type VoteTableReqBody = null;
 type VoteTableResBody = voteTable.VoteTable;
@@ -153,6 +158,22 @@ export default (router: Router): void => {
         await model.updateQuestion(conn, question);
 
         res.sendStatus(200);
+    }));
+
+    // Get question suggestions handler
+    router.get('/:question_id/suggestions', wrapAsync(async (req, res) => {
+        const question_id = validateIdParam(req.params.question_id);
+
+        const conn = await getConn(req);
+        const question = await model.getQuestion(conn, question_id);
+        if (question === null) {
+            throw new ResourceNotFoundError();
+        }
+
+        const suggests: SuggestionsResBody =
+            await suggestions.getQuestionSuggestions(conn, question_id);
+
+        res.json(suggests);
     }));
 
     // Get vote table handler
