@@ -21,8 +21,9 @@ export async function getTagsOnQuestion(
 ): Promise<TagOnQuestion[]> {
     const stmt = SQL`
         SELECT tag_id, name, description
-        FROM question_tag JOIN tag
-             ON question_tag.tag_id = tag.id
+        FROM question_tag
+             JOIN
+             tag ON question_tag.tag_id = tag.id
         WHERE question_tag.question_id = ${question_id}`;
     const results = await conn.query(stmt);
     const questionTags = results.asRows() as TagOnQuestion[];
