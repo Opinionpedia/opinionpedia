@@ -35,9 +35,9 @@ CREATE TABLE question (
                       ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (profile_id) REFERENCES profile (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (profile_id)
+        REFERENCES profile (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE option_ (
@@ -58,12 +58,12 @@ CREATE TABLE option_ (
 
     PRIMARY KEY (id),
     INDEX (question_id),
-    FOREIGN KEY (profile_id) REFERENCES profile (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (question_id) REFERENCES question (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (profile_id)
+        REFERENCES profile (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (question_id)
+        REFERENCES question (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE vote (
@@ -94,15 +94,15 @@ CREATE TABLE vote (
     PRIMARY KEY (id),
     UNIQUE (question_id, profile_id),  -- Also services as index for question_id
     INDEX (option_id),
-    FOREIGN KEY (profile_id) REFERENCES profile (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (question_id) REFERENCES question (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (option_id) REFERENCES option_ (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (profile_id)
+        REFERENCES profile (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (question_id)
+        REFERENCES question (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (option_id)
+        REFERENCES option_ (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE tag (
@@ -125,9 +125,9 @@ CREATE TABLE tag (
 
     PRIMARY KEY (id),
     UNIQUE (name),
-    FOREIGN KEY (profile_id) REFERENCES profile (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (profile_id)
+        REFERENCES profile (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE profile_tag (
@@ -135,12 +135,12 @@ CREATE TABLE profile_tag (
     profile_id   INTEGER NOT NULL,
 
     PRIMARY KEY (profile_id, tag_id),
-    FOREIGN KEY (tag_id) REFERENCES tag (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (profile_id) REFERENCES profile (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (tag_id)
+        REFERENCES tag (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (profile_id)
+        REFERENCES profile (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE question_tag (
@@ -148,10 +148,10 @@ CREATE TABLE question_tag (
     question_id   INTEGER NOT NULL,
 
     PRIMARY KEY (question_id, tag_id),
-    FOREIGN KEY (tag_id) REFERENCES tag (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (question_id) REFERENCES question (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    FOREIGN KEY (tag_id)
+        REFERENCES tag (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (question_id)
+        REFERENCES question (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
