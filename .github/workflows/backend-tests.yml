@@ -27,19 +27,19 @@ jobs:
     - name: Wait for backend server to be ready
       run: |
         is_backend_running() {
-            running=$(docker inspect backend_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
+            running=$(docker inspect opinionpedia_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
             test $running = true
         }
 
         is_backend_ready() {
-            latest_line=$(docker logs --tail 1 backend_backend_1)
+            latest_line=$(docker logs --tail 1 opinionpedia_backend_1)
             test "$latest_line" = 'Listening on port 4000'
         }
 
         die() {
             docker ps -a
             echo
-            docker logs backend_backend_1
+            docker logs opinionpedia_backend_1
             exit 1
         }
 
@@ -72,7 +72,7 @@ jobs:
         if ! yarn test; then
             echo
             echo 'Backend log:'
-            docker logs backend_backend_1
+            docker logs opinionpedia_backend_1
             echo
             echo 'Error: Test failed'
         fi
