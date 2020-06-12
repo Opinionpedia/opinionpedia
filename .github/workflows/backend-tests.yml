@@ -19,14 +19,10 @@ jobs:
         node-version: 12.x
 
     - name: Build the backend server
-      run: |
-        cd backend
-        docker-compose build
+      run: docker-compose build
 
     - name: Start MySQL and the backend server
-      run: |
-        cd backend
-        docker-compose up -d
+      run: docker-compose up -d
 
     - name: Wait for backend server to be ready
       run: |
@@ -73,7 +69,6 @@ jobs:
 
     - name: Run tests
       run: |
-        cd backend
         if ! yarn test; then
             echo
             echo 'Backend log:'
