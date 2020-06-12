@@ -3,6 +3,7 @@
         "compression": "^1.7.4",
         "dotenv": "^8.2.0",
         "express": "^4.17.1",
+        "is-ip": "^3.1.0",
         "jsonwebtoken": "^8.5.1",
         "mysql": "^2.18.1",
         "sql-template-strings": "^2.2.2"
@@ -21,10 +22,8 @@
     "scripts": {
         "build": "tsc",
         "watch": "tsc -w",
-
         "start-dev": "bash -c 'NODE_ENV=development node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
         "start-prod": "bash -c 'NODE_ENV=production node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
-
         "lint": "eslint src",
         "test": "node --experimental-modules --unhandled-rejections=strict test.js"
     },

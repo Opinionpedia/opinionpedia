@@ -183,6 +183,16 @@ async function test() {
     log(await get(200, { path: `/profile/${profile_id}` }));
     log(await get(200, { path: `/profile/${username}` }));
 
+    log(await post(400, {
+        path: '/profile',
+        body: {
+            username: '::1.2.3.4',  // IPv6 address
+            password: 'password',
+            description: null,
+            body: null,
+        },
+    }));
+
     console.log('================');
     console.log('TESTING QUESTION');
     console.log('================');

@@ -1,3 +1,4 @@
+import isIp from 'is-ip';
 import SQL from 'sql-template-strings';
 
 import { SQLDate, isId, isVarchar } from './util.js';
@@ -46,8 +47,13 @@ export function isUsernameValid(value: unknown): boolean {
     }
 
     // Usernames can't start with numbers.
-    const isNum = !isNaN(parseInt(value as string));
-    return !isNum;
+    const isNum = !isNaN(parseInt(value));
+    if (isNum) {
+        return false;
+    }
+
+    // Usernames can't be an IP address.
+    return !isIp(value);
 }
 
 export { isPasswordValid } from '../password.js';
