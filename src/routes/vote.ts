@@ -1,11 +1,12 @@
 //
 // The endpoint are:
 //
-// List     GET   /api/vote
-// List     GET   /api/vote/question/:question_id
-// Details  GET   /api/vote/:vote_id
-// Create   POST  /api/vote
-// Modify   PATCH /api/vote/:vote_id
+// List     GET    /api/vote
+// List     GET    /api/vote/question/:question_id
+// Details  GET    /api/vote/:vote_id
+// Create   POST   /api/vote
+// Modify   PATCH  /api/vote/:vote_id
+// Delete   DELETE /api/vote/:vote_id
 //
 
 import { Router } from 'express';
@@ -53,6 +54,9 @@ type CreateVoteResBody = { vote_id: number; };
 
 type ModifyVoteReqBody = Omit<model.UpdateVote, 'id'>;
 type ModifyVoteResBody = null;
+
+type DeleteVoteReqBody = null;
+type DeleteVoteResBody = null;
 
 export default (router: Router): void => {
     // List votes handler
@@ -194,6 +198,32 @@ export default (router: Router): void => {
         }
 
         await model.updateVote(conn, vote);
+
+        res.sendStatus(200);
+    }));
+
+    // Delete vote handler
+    router.delete('/:vote_id', wrapAsync(async (req, res) => {
+        const vote_id = validateIdParam(req.params.vote_id);
+
+        const { profile_id } = await validateRequestJWT(req);
+
+        // Get existing vote.
+        const conn = await getConn(req);
+        const vote = await model.getVote(conn, vote_id);
+        if (vote === null) {
+            throw new ResourceNotFoundError();
+        }
+
+        if (vote.profile_id !== profile_id) {
+            throw new NotOwnerError();
+        }
+
+        // Perform the delete.
+        const found = await model.deleteVote(conn, vote_id);
+        if (!found) {
+            throw new ResourceNotFoundError();
+        }
 
         res.sendStatus(200);
     }));

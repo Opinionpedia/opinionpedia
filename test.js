@@ -167,6 +167,13 @@ function patch(statusCode, options) {
     );
 }
 
+function del(statusCode, options) {
+    return tryRequest(
+        statusCode,
+        Object.assign({}, options, { method: 'DELETE' })
+    );
+}
+
 function randomNumber() {
     return (Math.random() * 10000).toFixed();
 }
@@ -296,7 +303,7 @@ async function test() {
         },
     });
     log(res);
-    const { vote_id } = res.json;
+    let { vote_id } = res.json;
 
     log(await get(200, { path: `/vote/${vote_id}` }));
 
@@ -314,6 +321,24 @@ async function test() {
     log(await get(200, { path: `/vote/${vote_id}` }));
 
     log(await get(200, { path: `/vote/question/${question_id}` }));
+
+    log(await del(200, { path: `/vote/${vote_id}`, token }));
+
+    res = await post(200, {
+        path: '/vote',
+        token,
+        body: {
+            profile_id,
+            question_id,
+            option_id,
+            header: 1,
+            body: 'Body for vote',
+            description: 'Description for vote',
+            active: 3,
+        },
+    });
+    log(res);
+    vote_id = res.json.vote_id;
 
     console.log('===========');
     console.log('TESTING TAG');

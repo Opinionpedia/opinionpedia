@@ -74,8 +74,9 @@ export class QueryResults {
     }
 }
 
-// E.g., INSERT statements.
+// E.g., INSERT and DELETE statements.
 interface Ok {
+    affectedRows: number;
     insertId: number;
 }
 

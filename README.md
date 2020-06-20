@@ -155,6 +155,7 @@ Table of contents
   - [List votes on question](#list-votes-on-question)
   - [Create vote](#create-vote)
   - [Modify vote](#modify-vote)
+  - [Delete vote](#delete-vote)
 - Tags
   - [List tags](#list-tags)
   - [Detail tag](#detail-tag)
@@ -771,6 +772,33 @@ Request body: {
     "header": 2,
     "body": null,
     "active": 4
+}
+```
+
+
+
+Delete vote
+-----------
+
+Delete a vote. Votes may only be deleted by the profile that created them.
+
+```
+Method: DELETE
+Path: /vote/:vote_id
+Headers: {
+    "Authorization": string
+}
+Possible errors:
+  - HTTP 403: You don't own that
+  - HTTP 404: Not found
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/vote/456
+Headers: {
+    "Authorization": "Bearer my.jwt.here"
 }
 ```
 

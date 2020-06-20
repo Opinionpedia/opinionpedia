@@ -122,10 +122,9 @@ export async function createVote(
                           description, active)
         VALUES (${profile_id}, ${question_id}, ${option_id}, ${header}, ${body},
                 ${description}, ${active})`;
-
     const results = await conn.query(stmt);
-
     const id = results.asOk().insertId;
+
     return id;
 }
 
@@ -151,4 +150,15 @@ export async function updateVote(
         WHERE id = ${id}`;
 
     await conn.query(stmt);
+}
+
+export async function deleteVote(conn: Conn, id: number): Promise<boolean> {
+    const stmt = SQL`
+        DELETE
+        FROM vote
+        WHERE id = ${id}`;
+    const results = await conn.query(stmt);
+    const { affectedRows } = results.asOk();
+
+    return affectedRows === 1;
 }
