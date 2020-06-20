@@ -11,7 +11,7 @@ export interface QuestionTag {
 }
 
 export type TagOnQuestion =
-    { tag_id: number; } & Pick<Tag, 'name' | 'description'>;
+    { tag_id: number; } & Pick<Tag, 'name' | 'description' | 'category'>;
 
 export const isIdValid = isId;
 
@@ -20,7 +20,7 @@ export async function getTagsOnQuestion(
     question_id: number
 ): Promise<TagOnQuestion[]> {
     const stmt = SQL`
-        SELECT tag_id, name, description
+        SELECT tag_id, name, description, category
         FROM question_tag
              JOIN
              tag ON question_tag.tag_id = tag.id

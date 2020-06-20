@@ -222,6 +222,7 @@ export default (router: Router): void => {
         // Perform the delete.
         const found = await model.deleteVote(conn, vote_id);
         if (!found) {
+            // Rare: Already deleted due to race condition.
             throw new ResourceNotFoundError();
         }
 

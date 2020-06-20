@@ -31,6 +31,7 @@ import { ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 import { hasCode } from '../errors.js';
 
 import * as model from '../models/option.js';
+import * as question from '../models/question.js';
 
 //
 // Request body types
@@ -106,7 +107,18 @@ export default (router: Router): void => {
 
         const { profile_id } = await validateRequestJWT(req);
 
+        // Get existing question.
         const conn = await getConn(req);
+        const q = await question.getQuestion(conn, question_id);
+        if (q === null) {
+            // The question doesn't exist in the database.
+            throw new ReferencedResourceNotFound();
+        }
+
+        // Profiles can only create options on questions they own.
+        if (q.profile_id !== profile_id) {
+            throw new NotOwnerError();
+        }
 
         let option_id;
         try {
@@ -118,7 +130,7 @@ export default (router: Router): void => {
             });
         } catch (err) {
             if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // The profile and/or question doesn't exist in the database.
+                // Rare: The profile doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
             } else {
                 throw err;

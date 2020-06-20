@@ -63,8 +63,7 @@ export default (router: Router): void => {
         const tag_id = validateIdParam(req.params.tag_id);
 
         const conn = await getConn(req);
-        const tag: DetailTagResBody | null =
-            await model.getTag(conn, tag_id);
+        const tag: DetailTagResBody | null = await model.getTag(conn, tag_id);
         if (tag === null) {
             throw new ResourceNotFoundError();
         }
@@ -104,7 +103,7 @@ export default (router: Router): void => {
                 // Tag already exists.
                 throw new ResourceAlreadyExistsDBError();
             } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // The profile doesn't exist in the database.
+                // Rare: The profile doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
             } else {
                 throw err;

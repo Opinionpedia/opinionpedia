@@ -74,13 +74,13 @@ export class CouldNotConnectDBError extends HTTP503ServiceNotAvailableError {
 
 export class MissingAuthorizationError extends HTTP403ForbiddenError {
     constructor() {
-        super('Missing "Authorization" header');
+        super('Missing Authorization header');
     }
 }
 
 export class NotOwnerError extends HTTP403ForbiddenError {
     constructor() {
-        super('You don\'t own that');
+        super('Not owner');
     }
 }
 
@@ -92,7 +92,7 @@ export class IncorrectPassword extends HTTP403ForbiddenError {
 
 export class InvalidAuthorizationError extends HTTP400BadRequestError {
     constructor() {
-        super('Invalid "Authorization" header: malformed or expired value');
+        super('Invalid Authorization header: malformed or expired value');
     }
 }
 
