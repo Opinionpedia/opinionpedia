@@ -4,7 +4,7 @@ import { performance } from 'perf_hooks';
 import SQL, { SQLStatement } from 'sql-template-strings';
 
 import { production } from './config.js';
-import { MySQLError, MySQLDriverError } from './errors.js';
+import { MySQLError, MySQLDriverError, hasCode } from './errors.js';
 
 if (process.env.DB_HOST === undefined ||
     process.env.DB_USER === undefined ||
@@ -221,7 +221,7 @@ export class Conn {
             } catch (err) {
                 this.connection = null;
 
-                if (err.code === 'ECONNREFUSED' && attempts > 1) {
+                if (hasCode(err, 'ECONNREFUSED') && attempts > 1) {
                     console.log(
                         `MySQL connection refused, retrying for ` +
                         `${0.5 * (attempts-1)} more seconds...`);

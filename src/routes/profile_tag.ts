@@ -25,6 +25,7 @@ import {
     ERR_MYSQL_DUP_ENTRY,
     ERR_MYSQL_NO_REFERENCED_ROW,
 } from '../db.js';
+import { hasCode } from '../errors.js';
 
 import * as model from '../models/profile_tag.js';
 
@@ -66,10 +67,10 @@ export default (router: Router): void => {
                 profile_id,
             });
         } catch (err) {
-            if (err.code === ERR_MYSQL_DUP_ENTRY) {
+            if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
                 // This profile tag already existed.
                 throw new ResourceAlreadyExistsDBError();
-            } else if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
+            } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
                 // The profile and/or tag doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
             } else {

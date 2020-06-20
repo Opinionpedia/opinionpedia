@@ -32,6 +32,7 @@ import {
     ERR_MYSQL_DUP_ENTRY,
     ERR_MYSQL_NO_REFERENCED_ROW,
 } from '../db.js';
+import { hasCode } from '../errors.js';
 
 import * as model from '../models/vote.js';
 
@@ -126,10 +127,10 @@ export default (router: Router): void => {
                 active,
             });
         } catch (err) {
-            if (err.code === ERR_MYSQL_DUP_ENTRY) {
+            if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
                 // This profile already voted on this question.
                 throw new ResourceAlreadyExistsDBError();
-            } else if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
+            } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
                 // The profile, question, and/or option doesn't exist in the
                 // database.
                 throw new ReferencedResourceNotFound();

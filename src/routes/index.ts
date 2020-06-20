@@ -88,7 +88,7 @@ function handleHTTPError(
     res: Response,
     next: NextFunction
 ): void {
-    if (err instanceof HTTPError) {
+    if (err instanceof HTTPError && err.statusMessage) {
         const { statusCode, statusMessage, message } = err;
         if (message) {
             console.error(`HTTP ${statusCode} ${statusMessage}: ${message}`);

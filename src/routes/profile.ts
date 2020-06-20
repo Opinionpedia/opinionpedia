@@ -32,6 +32,7 @@ import {
 
 import * as auth from '../auth.js';
 import { ERR_MYSQL_DUP_ENTRY } from '../db.js';
+import { hasCode } from '../errors.js';
 import { hashPassword, makeSalt } from '../password.js';
 
 import * as model from '../models/profile.js';
@@ -156,7 +157,7 @@ export default (routers: { profile: Router, login: Router }): void => {
                 body,
             });
         } catch (err) {
-            if (err.code === ERR_MYSQL_DUP_ENTRY) {
+            if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
                 throw new ResourceAlreadyExistsDBError();
             } else {
                 throw err;

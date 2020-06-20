@@ -113,10 +113,10 @@ export function validateIdParam(value: string | undefined): number {
 type BodyValidator = (value: unknown) => boolean;
 
 function getBodyProps<BodyProperties>(
-    body: any,
+    body: { [prop: string]: unknown },
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
 ): BodyProperties | null {
-    const bodyProperties: any = {};
+    const bodyProperties: { [prop: string]: unknown } = {};
 
     for (const key in validators) {
         const value: unknown = body[key];
@@ -131,7 +131,7 @@ function getBodyProps<BodyProperties>(
         bodyProperties[key] = value;
     }
 
-    return bodyProperties as BodyProperties;
+    return bodyProperties as unknown as BodyProperties;
 }
 
 export function validateBodyProps<BodyProperties>(
@@ -147,10 +147,10 @@ export function validateBodyProps<BodyProperties>(
 }
 
 function getPartialBodyProps<BodyProperties>(
-    body: any,
+    body: { [prop: string]: unknown },
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
 ): Partial<BodyProperties> | null {
-    const bodyProperties: any = {};
+    const bodyProperties: { [prop: string]: unknown } = {};
 
     for (const key in validators) {
         const value: unknown = body[key];

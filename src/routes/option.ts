@@ -28,6 +28,7 @@ import {
 } from './util.js';
 
 import { ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
+import { hasCode } from '../errors.js';
 
 import * as model from '../models/option.js';
 
@@ -116,7 +117,7 @@ export default (router: Router): void => {
                 description,
             });
         } catch (err) {
-            if (err.code === ERR_MYSQL_NO_REFERENCED_ROW) {
+            if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
                 // The profile and/or question doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
             } else {
