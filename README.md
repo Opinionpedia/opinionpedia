@@ -307,7 +307,6 @@ Response body: {
 Possible errors:
   - HTTP 400: Already exists
   - HTTP 400: Invalid request parameters
-  - HTTP 404: Not found
 ```
 
 Example:
