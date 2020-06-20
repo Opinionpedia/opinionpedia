@@ -15,9 +15,20 @@ jobs:
       with:
         node-version: 12.x
 
-    - name: Build
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.cache/yarn
+        key: ${{ hashFiles('yarn.lock') }}
+
+    - name: Install dependencies
       run: |
         yarn install --frozen-lockfile
+
+    - name: Build
+      run: |
         yarn lint
         yarn build
 
