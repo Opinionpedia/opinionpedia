@@ -1,13 +1,13 @@
 //
 // The endpoint are:
 //
-// List        GET   /api/question
-// Details     GET   /api/question/:question_id
-// Create      POST  /api/question
-// Modify      PATCH /api/question/:question_id
+// List         GET   /api/question
+// Details      GET   /api/question/:question_id
+// Create       POST  /api/question
+// Modify       PATCH /api/question/:question_id
 //
-// Suggestions GET   /api/question/:question_id/suggestions
-// VoteTable   GET   /api/question/:question_id/vote_table
+// Suggestions  GET   /api/question/:question_id/suggestions
+// VoteTable    GET   /api/question/:question_id/vote_table
 //
 
 import { Router } from 'express';
@@ -108,7 +108,7 @@ export default (router: Router): void => {
             });
         } catch (err) {
             if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // The profile doesn't exist in the database.
+                // Rare: The profile doesn't exist in the database.
                 throw new ResourceNotFoundError();
             } else {
                 throw err;

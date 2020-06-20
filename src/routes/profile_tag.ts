@@ -1,8 +1,8 @@
 //
 // The endpoint are:
 //
-// List     GET   /api/tag/profile/:profile_id
-// Create   POST  /api/tag/profile
+// List    GET   /api/tag/profile/:profile_id
+// Create  POST  /api/tag/profile
 //
 
 import { Router } from 'express';

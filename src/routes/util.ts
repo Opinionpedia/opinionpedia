@@ -250,7 +250,7 @@ export async function validateRequestJWT(req: Request): Promise<Token> {
  * users.
  *
  * Otherwise, the request's remote IP address is used to find or create (if it
- * didn't already exist) a profile.
+ * didn't already exist) a so-called IP address profile.
  *
  * @param req - the HTTP request
  * @returns a profile ID to use for authorizing actions in the request

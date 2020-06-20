@@ -1,9 +1,9 @@
 //
 // The endpoint are:
 //
-// List     GET   /api/tag/question/:question_id/tags
-// List     GET   /api/tag/question/:tag_id/questions
-// Create   POST  /api/tag/question
+// List    GET   /api/tag/question/:question_id/tags
+// List    GET   /api/tag/question/:tag_id/questions
+// Create  POST  /api/tag/question
 //
 
 import { Router } from 'express';
