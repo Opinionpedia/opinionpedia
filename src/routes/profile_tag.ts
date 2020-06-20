@@ -57,6 +57,8 @@ export default (router: Router): void => {
             { tag_id: model.isIdValid }
         );
 
+        // Must be logged in to create a profile tag. IP address profiles
+        // cannot have profile tags associated with them.
         const { profile_id } = await validateRequestJWT(req);
 
         const conn = await getConn(req);

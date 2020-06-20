@@ -235,17 +235,6 @@ async function test() {
     log(res);
     const { question_id } = res.json;
 
-    res = await post(200, {
-        path: '/question',
-        token: undefined,
-        body: {
-            prompt: 'Question from an IP address',
-            description: '',
-        },
-    });
-    log(res);
-    const ipQuestionId = res.json.question_id;
-
     log(await get(200, { path: `/question/${question_id}` }));
 
     log(await patch(200, {
@@ -254,14 +243,6 @@ async function test() {
         body: {
             prompt: 'New prompt for question',
             description: 'New description for question',
-        },
-    }));
-
-    log(await patch(200, {
-        path: `/question/${ipQuestionId}`,
-        token: undefined,
-        body: {
-            prompt: 'Updated question from an IP address',
         },
     }));
 
@@ -285,18 +266,6 @@ async function test() {
     log(res);
     const { option_id } = res.json;
 
-    res = await post(200, {
-        path: '/option',
-        token: undefined,
-        body: {
-            question_id: ipQuestionId,
-            prompt: 'Option from an IP address',
-            description: '',
-        },
-    });
-    log(res);
-    const ipOptionId = res.json.option_id;
-
     log(await get(200, { path: `/option/${option_id}` }));
 
     log(await patch(200, {
@@ -305,14 +274,6 @@ async function test() {
         body: {
             prompt: 'New prompt for option',
             description: 'New description for option',
-        },
-    }));
-
-    log(await patch(200, {
-        path: `/option/${ipOptionId}`,
-        token: undefined,
-        body: {
-            prompt: 'Updated option from an IP address',
         },
     }));
 
@@ -343,8 +304,8 @@ async function test() {
         path: '/vote',
         token: undefined,
         body: {
-            question_id: ipQuestionId,
-            option_id: ipOptionId,
+            question_id,
+            option_id,
             header: null,
             body: null,
             description: 'Vote from an IP address',
@@ -380,6 +341,8 @@ async function test() {
     log(await get(200, { path: `/vote/question/${question_id}` }));
 
     log(await del(200, { path: `/vote/${vote_id}`, token }));
+
+    log(await del(200, { path: `/vote/${ipVoteId}`, token: undefined }));
 
     res = await post(200, {
         path: '/vote',

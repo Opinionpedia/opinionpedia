@@ -388,15 +388,11 @@ req.params: {
 Create question
 ---------------
 
-The created question will be owned by the profile the client is logged into, if
-they send an authorization header. Otherwise, it will be owned by the client's
-IP address.
-
 ```
 Method: POST
 Path: /question
 Headers: {
-    Authorization: string | undefined;
+    Authorization: string;
 }
 Request body: {
     prompt: string;
@@ -422,16 +418,11 @@ Request body: {
 Modify question
 ---------------
 
-If the question being modified was created by a logged in client, an
-authorization header must be provided. Otherwise, the question is considered
-owned by an IP address. The client's IP address must match this or it will be
-rejected.
-
 ```
 Method: PATCH
 Path: /question/:question_id
 Headers: {
-    Authorization: string | undefined;
+    Authorization: string;
 }
 Request body: {
     prompt?: string;
@@ -593,10 +584,6 @@ req.params: {
 Create option
 -------------
 
-The created option will be owned by the profile the client is logged into, if
-they send an authorization header. Otherwise, it will be owned by the client's
-IP address.
-
 ```
 Route method: POST
 Route path: /option
@@ -614,11 +601,6 @@ req.body: {
 
 Modify option
 -------------
-
-If the option being modified was created by a logged in client, an
-authorization header must be provided. Otherwise, the option is considered
-owned by an IP address. The client's IP address must match this or it will be
-rejected.
 
 ```
 Route method: PATCH
@@ -744,23 +726,22 @@ The created vote will be owned by the profile the client is logged into, if
 they send an authorization header. Otherwise, it will be owned by the client's
 IP address.
 
-
 ```
 Method: POST
 Path: /vote
 Headers: {
-    Authorization: string
+    Authorization: string | undefined;
 }
 Request body: {
-    "question_id": number,
-    "option_id": number,
-    "header": number | null,
-    "body": string | null,
-    "description": string | null,
-    "active": number
+    question_id: number;
+    option_id: number;
+    header: number | null;
+    body: string | null;
+    description: string | null;
+    active: number;
 }
 Response body: {
-    "vote_id": number
+    vote_id: number;
 }
 ```
 
@@ -800,7 +781,7 @@ address. The client's IP address must match this or it will be rejected.
 Method: PATCH
 Path: /vote/:vote_id
 Headers: {
-    Authorization: string
+    Authorization: string | undefined;
 }
 Request body: {
     "header": number | null | undefined,

@@ -78,7 +78,7 @@ export default (router: Router): void => {
             }
         );
 
-        // Anybody can tag a question, but you must be logged in.
+        // Must be logged in to tag a question.
         await validateRequestJWT(req);
 
         const conn = await getConn(req);

@@ -19,11 +19,11 @@ import {
 } from './errors.js';
 
 import {
-    getProfileID,
     notAvailableInProduction,
     validateBodyProps,
     validateIdParam,
     validatePartialBodyProps,
+    validateRequestJWT,
     wrapAsync,
 } from './util.js';
 
@@ -104,7 +104,7 @@ export default (router: Router): void => {
             }
         );
 
-        const profile_id = await getProfileID(req);
+        const { profile_id } = await validateRequestJWT(req);
 
         const conn = await getConn(req);
 
@@ -144,7 +144,7 @@ export default (router: Router): void => {
             }
         );
 
-        const profile_id = await getProfileID(req);
+        const { profile_id } = await validateRequestJWT(req);
 
         // Get existing option.
         const conn = await getConn(req);
