@@ -165,6 +165,7 @@ Table of contents
   - [Create profile tag](#create-profile-tag)
 - Question tags
   - [List tags on question](#list-tags-on-question)
+  - [List questions with tag](#list-questions-with-tag)
   - [Create question tag](#create-question-tag)
 
 
@@ -356,6 +357,7 @@ Response body: {
 ```
 
 
+
 List questions
 --------------
 
@@ -540,6 +542,7 @@ req.params: {
 ```
 
 
+
 Detail option
 -------------
 
@@ -657,6 +660,7 @@ Response body: [{
 ```
 
 
+
 Detail vote
 -----------
 
@@ -734,6 +738,7 @@ Response body: {
     "vote_id": 1
 }
 ```
+
 
 
 Modify vote
@@ -879,6 +884,7 @@ Response body: {
 ```
 
 
+
 Modify tag
 -----------
 
@@ -940,6 +946,7 @@ Response body: [{
 ```
 
 
+
 Create profile tag
 ------------------
 
@@ -978,7 +985,7 @@ Get list of tags on a question.
 
 ```
 Method: GET
-Path: /tag/question/:question_id
+Path: /tag/question/:question_id/tags
 Params: {
     question_id: number;
 }
@@ -992,13 +999,41 @@ Response body: {
 Example:
 
 ```
-URL: http://localhost:4000/api/tag/question/123
+URL: http://localhost:4000/api/tag/question/123/tags
 Response body: [{
     "tag_id": 456,
     "name": "Man",
     "description": "Identifies as man"
 }]
 ```
+
+
+
+List questions with tag
+-----------------------
+
+Get list of ids of every question tagged with a particular tag.
+
+```
+Method: GET
+Path: /tag/question/:tag_id/questions
+Params: {
+    tag_id: number;
+}
+Response body: number[]
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/tag/question/123/questions
+Response body: [
+    123,
+    456,
+    789
+]
+```
+
 
 
 Create question tag

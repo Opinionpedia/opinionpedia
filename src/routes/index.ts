@@ -58,7 +58,7 @@ function handleNoSuchRoute(
     res: Response,
     next: NextFunction
 ): void {
-    if (!req.complete) {
+    if (!res.headersSent) {
         console.error('Route not found');
 
         res.status(400);

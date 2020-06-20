@@ -21,6 +21,23 @@ function request({ method, path, token, body }) {
     const reqJson = body;
     const reqText = body && JSON.stringify(body, null, 4);
 
+    // For use in logging.
+    const descriptor = {
+        method,
+        path,
+        token,
+        text: reqText,
+        json: reqJson,
+    };
+
+    // For use in error messages.
+    const humanDescriptor = JSON.stringify({
+        method,
+        path,
+        token,
+        body,
+    });
+
     return new Promise((resolve, reject) => {
         const req = http.request(options);
 
@@ -44,13 +61,7 @@ function request({ method, path, token, body }) {
                 }
 
                 resolve({
-                    req: {
-                        method,
-                        path,
-                        token,
-                        text: reqText,
-                        json: reqJson,
-                    },
+                    req: descriptor,
                     statusCode: res.statusCode,
                     statusMessage: res.statusMessage,
                     text: resText,
@@ -59,11 +70,22 @@ function request({ method, path, token, body }) {
             });
         });
 
-        req.on('error', reject);
+        req.on(
+            'error',
+            (err) => reject(new Error(`${err}: ${humanDescriptor}`))
+        );
+
+        req.on(
+            'timeout',
+            () => reject(new Error(`Request timeout: ${humanDescriptor}`))
+        );
 
         if (reqText) {
             req.write(reqText);
         }
+
+        const second = 1000;
+        req.setTimeout(5 * second);
 
         req.end();
     });
@@ -276,7 +298,7 @@ async function test() {
     log(res);
     const { vote_id } = res.json;
 
-    log(await get(200, { path: `/vote/${vote_id}`}));
+    log(await get(200, { path: `/vote/${vote_id}` }));
 
     log(await patch(200, {
         path: `/vote/${vote_id}`,
@@ -289,9 +311,9 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/vote/${vote_id}`}));
+    log(await get(200, { path: `/vote/${vote_id}` }));
 
-    log(await get(200, { path: `/vote/question/${question_id}`}));
+    log(await get(200, { path: `/vote/question/${question_id}` }));
 
     console.log('===========');
     console.log('TESTING TAG');
@@ -341,7 +363,7 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/${tag_id}` }));
 
     log(await patch(200, {
         path: `/tag/${tag_id}`,
@@ -352,7 +374,7 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/${tag_id}` }));
 
     console.log('===================');
     console.log('TESTING PROFILE TAG');
@@ -364,7 +386,7 @@ async function test() {
         body: { tag_id },
     }));
 
-    log(await get(200, { path: `/tag/profile/${profile_id}`}));
+    log(await get(200, { path: `/tag/profile/${profile_id}` }));
 
     console.log('====================');
     console.log('TESTING QUESTION TAG');
@@ -376,7 +398,9 @@ async function test() {
         body: { tag_id, question_id },
     }));
 
-    log(await get(200, { path: `/tag/question/${question_id}`}));
+    log(await get(200, { path: `/tag/question/${tag_id}/questions` }));
+
+    log(await get(200, { path: `/tag/question/${question_id}/tags` }));
 
     console.log('===================');
     console.log('TESTING SUGGESTIONS');
@@ -391,4 +415,7 @@ async function test() {
     log(await get(200, { path: `/question/${question_id}/vote_table` }));
 }
 
-test();
+test().catch((err) => {
+    console.error(err);
+    process.exit(1);
+});

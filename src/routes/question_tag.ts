@@ -1,7 +1,8 @@
 //
 // The endpoint are:
 //
-// List     GET   /api/tag/question/:question_id
+// List     GET   /api/tag/question/:question_id/tags
+// List     GET   /api/tag/question/:tag_id/questions
 // Create   POST  /api/tag/question
 //
 
@@ -35,12 +36,15 @@ import * as model from '../models/question_tag.js';
 type ListTagsOnQuestionReqBody = null;
 type ListTagsOnQuestionResBody = model.TagOnQuestion[];
 
+type ListQuestionsWithTagReqBody = null;
+type ListQuestionsWithTagResBody = number[];
+
 type CreateQuestionTagReqBody = model.QuestionTag;
 type CreateQuestionTagResBody = null;
 
 export default (router: Router): void => {
     // List tags on question handler
-    router.get('/:question_id', wrapAsync(async (req, res) => {
+    router.get('/:question_id/tags', wrapAsync(async (req, res) => {
         const question_id = validateIdParam(req.params.question_id);
 
         const conn = await getConn(req);
@@ -48,6 +52,17 @@ export default (router: Router): void => {
             await model.getTagsOnQuestion(conn, question_id);
 
         res.json(tags);
+    }));
+
+    // List questions with tag handler
+    router.get('/:question_id/questions', wrapAsync(async (req, res) => {
+        const tag_id = validateIdParam(req.params.question_id);
+
+        const conn = await getConn(req);
+        const questionIds: ListQuestionsWithTagResBody =
+            await model.getQuestionsWithTag(conn, tag_id);
+
+        res.json(questionIds);
     }));
 
     // Create question tag handler

@@ -14,14 +14,12 @@ function log(req: Request, res: Response, next: NextFunction): void {
 }
 
 function send404(req: Request, res: Response, next: NextFunction): void {
-    if (req.complete) {
-        return;
+    if (!res.headersSent) {
+        console.log('HTTP 404 Not Found');
+        res.sendFile('public/404.html', {
+            root: process.cwd(),
+        });
     }
-
-    console.log('HTTP 404 Not Found');
-    res.sendFile('public/404.html', {
-        root: process.cwd(),
-    });
 
     next();
 }
