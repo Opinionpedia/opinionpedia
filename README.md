@@ -263,14 +263,14 @@ Create a profile.
 Method: POST
 Path: /profile
 Request body: {
-    "username": string,
-    "password": string,
-    "description": string | null,
-    "body": string | null
+    username: string;
+    password: string;
+    description: string | null;
+    body: string | null;
 }
 Response body: {
-    "profile_id": number,
-    "token": string
+    profile_id: number;
+    token: string;
 }
 ```
 
@@ -282,7 +282,7 @@ Request body: {
     "username": "your name",
     "password": "some password",
     "description": "Description for your profile",
-    "body": null,
+    "body": null
 }
 Response body: {
     "profile_id": 2,
@@ -301,13 +301,13 @@ Update a profile. Only fields included in request body are modified.
 Method: PATCH
 Path: /profile
 Headers: {
-    "Authorization": string
+    Authorization: string;
 }
 Request body: {
-    "username": string | undefined,
-    "password": string | undefined,
-    "description": string | undefined,
-    "body": string | undefined
+    username: string | undefined;
+    password: string | undefined;
+    description: string | undefined;
+    body: string | undefined;
 }
 ```
 
@@ -316,7 +316,7 @@ Example:
 ```
 URL: http://localhost:4000/api/profile
 Headers: {
-    "Authorization": "Bearer my.jwt.here"
+    Authorization: "Bearer my.jwt.here"
 }
 Request body: {
     "password": "My new password"
@@ -388,15 +388,32 @@ req.params: {
 Create question
 ---------------
 
-```
-Route method: POST
-Route path: /question
-Request URL: http://localhost:4000/api/question
+The created question will be owned by the profile the client is logged into, if
+they send an authorization header. Otherwise, it will be owned by the client's
+IP address.
 
-req.headers.authorization: "Bearer a.b.c"
-req.body: {
-    "prompt": "Prompt for question",
-    "description": "Description for question",
+```
+Method: POST
+Path: /question
+Headers: {
+    Authorization: string | undefined;
+}
+Request body: {
+    prompt: string;
+    description: string;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/question
+Headers: {
+    Authorization: "Bearer my.jwt.here"
+}
+Request body: {
+    "prompt": "What do you think about X?",
+    "description": "I was just wondering..."
 }
 ```
 
@@ -405,18 +422,32 @@ req.body: {
 Modify question
 ---------------
 
-```
-Route method: PATCH
-Route path: /question/:question_id
-Request URL: http://localhost:4000/api/question/123
+If the question being modified was created by a logged in client, an
+authorization header must be provided. Otherwise, the question is considered
+owned by an IP address. The client's IP address must match this or it will be
+rejected.
 
-req.headers.authorization: "Bearer a.b.c"
-req.params: {
-    "question_id": 123
+```
+Method: PATCH
+Path: /question/:question_id
+Headers: {
+    Authorization: string | undefined;
 }
-req.body: {
-    "prompt": "My new prompt",           // optional
-    "description": "My new description"  // optional
+Request body: {
+    prompt?: string;
+    description?: string;
+}
+```
+
+Example:
+
+```
+URL: http://localhost:4000/api/question/123
+Headers: {
+    Authorization: "Bearer my.jwt.here"
+}
+Request body: {
+    "prompt": "What does the world think about X?"
 }
 ```
 
@@ -562,6 +593,10 @@ req.params: {
 Create option
 -------------
 
+The created option will be owned by the profile the client is logged into, if
+they send an authorization header. Otherwise, it will be owned by the client's
+IP address.
+
 ```
 Route method: POST
 Route path: /option
@@ -579,6 +614,11 @@ req.body: {
 
 Modify option
 -------------
+
+If the option being modified was created by a logged in client, an
+authorization header must be provided. Otherwise, the option is considered
+owned by an IP address. The client's IP address must match this or it will be
+rejected.
 
 ```
 Route method: PATCH
@@ -700,11 +740,16 @@ Create vote
 
 Create a vote.
 
+The created vote will be owned by the profile the client is logged into, if
+they send an authorization header. Otherwise, it will be owned by the client's
+IP address.
+
+
 ```
 Method: POST
 Path: /vote
 Headers: {
-    "Authorization": string
+    Authorization: string
 }
 Request body: {
     "question_id": number,
@@ -724,7 +769,7 @@ Example:
 ```
 URL: http://localhost:4000/api/vote
 Headers: {
-    "Authorization": "Bearer a.b.c"
+    Authorization: "Bearer a.b.c"
 }
 Request body: {
     "profile_id": 123,
@@ -747,11 +792,15 @@ Modify vote
 
 Update a vote. Only fields included in request body are modified.
 
+If the vote being modified was created by a logged in client, an authorization
+header must be provided. Otherwise, the question is considered owned by an IP
+address. The client's IP address must match this or it will be rejected.
+
 ```
 Method: PATCH
 Path: /vote/:vote_id
 Headers: {
-    "Authorization": string
+    Authorization: string
 }
 Request body: {
     "header": number | null | undefined,
@@ -766,7 +815,7 @@ Example:
 ```
 URL: http://localhost:4000/api/vote/456
 Headers: {
-    "Authorization": "Bearer a.b.c"
+    Authorization: "Bearer a.b.c"
 }
 Request body: {
     "header": 2,
@@ -782,11 +831,15 @@ Delete vote
 
 Delete a vote. Votes may only be deleted by the profile that created them.
 
+If the vote being deleted was created by a logged in client, an authorization
+header must be provided. Otherwise, the question is considered owned by an IP
+address. The client's IP address must match this or it will be rejected.
+
 ```
 Method: DELETE
 Path: /vote/:vote_id
 Headers: {
-    "Authorization": string
+    Authorization: string | undefined;
 }
 Possible errors:
   - HTTP 403: You don't own that
@@ -798,7 +851,7 @@ Example:
 ```
 URL: http://localhost:4000/api/vote/456
 Headers: {
-    "Authorization": "Bearer my.jwt.here"
+    Authorization: "Bearer my.jwt.here"
 }
 ```
 
@@ -900,7 +953,7 @@ Example:
 ```
 URL: http://localhost:4000/api/tag
 Headers: {
-    "Authorization": "Bearer my.jwt.here"
+    Authorization: "Bearer my.jwt.here"
 }
 Request body: {
     "name": "My name for tag",
@@ -935,7 +988,7 @@ Example:
 ```
 URL: http://localhost:4000/api/tag/456
 Headers: {
-    "Authorization": "Bearer my.jwt.here"
+    Authorization: "Bearer my.jwt.here"
 }
 Request body: {
     "description": null

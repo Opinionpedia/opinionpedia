@@ -3,8 +3,10 @@ import http from 'http';
 /**
  * Make an HTTP request to the backend server.
  */
-function request({ method, path, token, body }) {
-    const options = {
+function request(options) {
+    const { method, path, token, body } = options;
+
+    const httpOptions = {
         host: 'localhost',
         port: 4000,
         method,
@@ -15,31 +17,14 @@ function request({ method, path, token, body }) {
     };
 
     if (token) {
-        options.headers.Authorization = `Bearer ${token}`;
+        httpOptions.headers.Authorization = `Bearer ${token}`;
     }
 
     const reqJson = body;
     const reqText = body && JSON.stringify(body, null, 4);
 
-    // For use in logging.
-    const descriptor = {
-        method,
-        path,
-        token,
-        text: reqText,
-        json: reqJson,
-    };
-
-    // For use in error messages.
-    const humanDescriptor = JSON.stringify({
-        method,
-        path,
-        token,
-        body,
-    });
-
     return new Promise((resolve, reject) => {
-        const req = http.request(options);
+        const req = http.request(httpOptions);
 
         req.on('response', (res) => {
             let resText = '';
@@ -61,7 +46,13 @@ function request({ method, path, token, body }) {
                 }
 
                 resolve({
-                    req: descriptor,
+                    req: {
+                        method,
+                        path,
+                        token,
+                        text: reqText,
+                        json: reqJson,
+                    },
                     statusCode: res.statusCode,
                     statusMessage: res.statusMessage,
                     text: resText,
@@ -72,12 +63,16 @@ function request({ method, path, token, body }) {
 
         req.on(
             'error',
-            (err) => reject(new Error(`${err}: ${humanDescriptor}`))
+            (err) => reject(
+                new Error(`${err}: ${JSON.stringify(options)}`)
+            )
         );
 
         req.on(
             'timeout',
-            () => reject(new Error(`Request timeout: ${humanDescriptor}`))
+            () => reject(
+                new Error(`Request timeout: ${JSON.stringify(options)}`)
+            )
         );
 
         if (reqText) {
@@ -140,7 +135,8 @@ async function tryRequest(statusCode, options) {
     if (res.statusCode !== statusCode) {
         log(res);
         throw new Error(
-            `Expected HTTP status to be ${statusCode}, got ${res.statusCode}`);
+            `Expected HTTP status to be ${statusCode}, got ${res.statusCode}`
+        );
     }
 
     return res;
@@ -239,6 +235,17 @@ async function test() {
     log(res);
     const { question_id } = res.json;
 
+    res = await post(200, {
+        path: '/question',
+        token: undefined,
+        body: {
+            prompt: 'Question from an IP address',
+            description: '',
+        },
+    });
+    log(res);
+    const ipQuestionId = res.json.question_id;
+
     log(await get(200, { path: `/question/${question_id}` }));
 
     log(await patch(200, {
@@ -247,6 +254,14 @@ async function test() {
         body: {
             prompt: 'New prompt for question',
             description: 'New description for question',
+        },
+    }));
+
+    log(await patch(200, {
+        path: `/question/${ipQuestionId}`,
+        token: undefined,
+        body: {
+            prompt: 'Updated question from an IP address',
         },
     }));
 
@@ -270,6 +285,18 @@ async function test() {
     log(res);
     const { option_id } = res.json;
 
+    res = await post(200, {
+        path: '/option',
+        token: undefined,
+        body: {
+            question_id: ipQuestionId,
+            prompt: 'Option from an IP address',
+            description: '',
+        },
+    });
+    log(res);
+    const ipOptionId = res.json.option_id;
+
     log(await get(200, { path: `/option/${option_id}` }));
 
     log(await patch(200, {
@@ -278,6 +305,14 @@ async function test() {
         body: {
             prompt: 'New prompt for option',
             description: 'New description for option',
+        },
+    }));
+
+    log(await patch(200, {
+        path: `/option/${ipOptionId}`,
+        token: undefined,
+        body: {
+            prompt: 'Updated option from an IP address',
         },
     }));
 
@@ -293,7 +328,6 @@ async function test() {
         path: '/vote',
         token,
         body: {
-            profile_id,
             question_id,
             option_id,
             header: 1,
@@ -305,6 +339,21 @@ async function test() {
     log(res);
     let { vote_id } = res.json;
 
+    res = await post(200, {
+        path: '/vote',
+        token: undefined,
+        body: {
+            question_id: ipQuestionId,
+            option_id: ipOptionId,
+            header: null,
+            body: null,
+            description: 'Vote from an IP address',
+            active: 0,
+        },
+    });
+    log(res);
+    let ipVoteId = res.json.vote_id;
+
     log(await get(200, { path: `/vote/${vote_id}` }));
 
     log(await patch(200, {
@@ -315,6 +364,14 @@ async function test() {
             body: 'New body for vote',
             description: 'New description for vote',
             active: 17,
+        },
+    }));
+
+    log(await patch(200, {
+        path: `/vote/${ipVoteId}`,
+        token: undefined,
+        body: {
+            description: 'Updated vote from an IP address',
         },
     }));
 
@@ -332,8 +389,8 @@ async function test() {
             question_id,
             option_id,
             header: 1,
-            body: 'Body for vote',
-            description: 'Description for vote',
+            body: null,
+            description: 'Second vote after first was deleted',
             active: 3,
         },
     });

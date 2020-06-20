@@ -21,11 +21,11 @@ import {
 } from './errors.js';
 
 import {
+    getProfileID,
     notAvailableInProduction,
     validateBodyProps,
     validateIdParam,
     validatePartialBodyProps,
-    validateRequestJWT,
     wrapAsync,
 } from './util.js';
 
@@ -115,7 +115,7 @@ export default (router: Router): void => {
             }
         );
 
-        const { profile_id } = await validateRequestJWT(req);
+        const profile_id = await getProfileID(req);
 
         const conn = await getConn(req);
 
@@ -167,7 +167,7 @@ export default (router: Router): void => {
             }
         );
 
-        const { profile_id } = await validateRequestJWT(req);
+        const profile_id = await getProfileID(req);
 
         // Get existing vote.
         const conn = await getConn(req);
@@ -206,7 +206,7 @@ export default (router: Router): void => {
     router.delete('/:vote_id', wrapAsync(async (req, res) => {
         const vote_id = validateIdParam(req.params.vote_id);
 
-        const { profile_id } = await validateRequestJWT(req);
+        const profile_id = await getProfileID(req);
 
         // Get existing vote.
         const conn = await getConn(req);

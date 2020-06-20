@@ -56,6 +56,10 @@ export function isUsernameValid(value: unknown): boolean {
     return !isIp(value);
 }
 
+export function isIPValid(value: unknown): boolean {
+    return typeof value === 'string' && isIp(value);
+}
+
 export { isPasswordValid } from '../password.js';
 
 export function isBodyValid(value: unknown): boolean {
@@ -89,7 +93,16 @@ export async function getProfile(
         return null;
     }
 
-    return profiles[0];
+    const profile = profiles[0];
+
+    if (profile.salt === null || profile.password === null) {
+        // It's possible to fetch an id for an IP address profile. Pretend
+        // those don't exist here. Use getIPAddrProfileId() instead if this is
+        // your intent.
+        return null;
+    }
+
+    return profile;
 }
 
 export async function getProfileByUsername(
@@ -107,7 +120,35 @@ export async function getProfileByUsername(
         return null;
     }
 
-    return profiles[0];
+    const profile = profiles[0];
+
+    if (profile.salt === null || profile.password === null) {
+        // This is an IP address profile, which means either username was an IP
+        // address or the database is inconsistent.
+        //
+        // Use getIPAddrProfileId() if you mean to get an IP address profile.
+        throw new Error('Logic error: profile missing salt and/or password');
+    }
+
+    return profile;
+}
+
+export async function getIPAddrProfileId(
+    conn: Conn,
+    remoteAddress: string
+): Promise<number | null> {
+    const stmt = SQL`
+        SELECT id FROM profile
+        WHERE username = ${remoteAddress}`;
+    const results = await conn.query(stmt);
+    const profiles = results.asRows() as { id: number; }[];
+
+    // Check if the result is found or not.
+    if (profiles.length !== 1) {
+        return null;
+    }
+
+    return profiles[0].id;
 }
 
 export async function createProfile(
@@ -125,10 +166,22 @@ export async function createProfile(
     const stmt = SQL`
         INSERT INTO profile (username, password, salt, description, body)
         VALUES (${username}, ${password}, ${salt}, ${description}, ${body})`;
-
     const results = await conn.query(stmt);
-
     const id = results.asOk().insertId;
+
+    return id;
+}
+
+export async function createIPAddrProfile(
+    conn: Conn,
+    remoteAddress: string
+): Promise<number> {
+    const stmt = SQL`
+        INSERT INTO profile (username)
+        VALUES (${remoteAddress})`;
+    const results = await conn.query(stmt);
+    const id = results.asOk().insertId;
+
     return id;
 }
 
@@ -152,6 +205,5 @@ export async function updateProfile(
             description = ${description},
             body = ${body}
         WHERE id = ${id}`;
-
     await conn.query(stmt);
 }
