@@ -1021,6 +1021,8 @@ Params: {
     tag_id: number;
 }
 Response body: number[]
+Possible errors:
+  - None
 ```
 
 Example:
