@@ -1,14 +1,11 @@
 name: Tests
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
-  run:
-    runs-on: ubuntu-latest
+  test:
+    name: yarn test
+    runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v2
@@ -18,61 +15,68 @@ jobs:
       with:
         node-version: 12.x
 
-    - name: Build the backend server
-      run: docker-compose build
-
-    - name: Start MySQL and the backend server
-      run: docker-compose up -d
-
-    - name: Wait for backend server to be ready
+    - name: Build
       run: |
-        is_backend_running() {
-            running=$(docker inspect opinionpedia_backend_1 | grep 'Running' | sed -E 's/.*(true|false).*/\1/')
-            test $running = true
-        }
+        yarn install --frozen-lockfile
+        yarn lint
+        yarn build
 
-        is_backend_ready() {
-            latest_line=$(docker logs --tail 1 opinionpedia_backend_1)
-            test "$latest_line" = 'Listening on port 4000'
-        }
+    - name: Start MySQL
+      run: |
+        # Start MySQL 5.7
+        sudo systemctl start mysql.service
 
-        die() {
-            docker ps -a
-            echo
-            docker logs opinionpedia_backend_1
-            exit 1
-        }
+        # Create table "test"
+        # This blocks until MySQL is finished booting up
+        mysql -uroot \
+              -proot \
+              -e "CREATE DATABASE test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-        tries=60
+    - name: Run tests
+      env:
+        CI: true
+        HTTP_PORT: 4000
+        JWT_SECRET: mysecret
+        DB_HOST: localhost
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_DATABASE: test
+      run: |
+        # Start backend server
+        yarn start-dev > log.txt 2>&1 &
 
-        while true; do
+        # Wait for backend server to be ready
+        for i in $(seq 1 60); do
             sleep 1
 
-            if ! is_backend_running; then
+            # Check if the server died.
+            if ! pidof node >/dev/null; then
                 echo 'Error: Backend has quit'
                 echo
-                die
+                cat log.txt
+                exit 1
             fi
 
-            if is_backend_ready; then
-                exit 0
-            fi
-
-            tries=$((tries - 1))
-
-            if [ $tries = 0 ]; then
-                echo 'Error: Timeout after 60 seconds'
-                echo
-                die
+            # Check if the server is accepting connections.
+            if nc -z localhost ${HTTP_PORT}; then
+                ok=1
+                break
             fi
         done
 
-    - name: Run tests
-      run: |
+        # Did we timeout? Then it's an error.
+        if [ -z "$ok" ]; then
+            echo 'Error: Timeout after 60 seconds'
+            echo
+            cat log.txt
+            exit 1
+        fi
+
         if ! yarn test; then
             echo
             echo 'Backend log:'
-            docker logs opinionpedia_backend_1
+            cat log.txt
             echo
             echo 'Error: Test failed'
+            exit 1
         fi
