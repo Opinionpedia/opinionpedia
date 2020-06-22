@@ -10,8 +10,10 @@ export interface ProfileTag {
     profile_id: number;
 }
 
-export type TagOnProfile =
-    { tag_id: number; } & Pick<Tag, 'name' | 'description' | 'category'>;
+export type TagOnProfile = { tag_id: number } & Pick<
+    Tag,
+    'name' | 'description' | 'category'
+>;
 
 export const isIdValid = isId;
 
@@ -35,10 +37,7 @@ export async function createProfileTag(
     conn: Conn,
     profileTag: ProfileTag
 ): Promise<void> {
-    const {
-        tag_id,
-        profile_id,
-    } = profileTag;
+    const { tag_id, profile_id } = profileTag;
 
     const stmt = SQL`
         INSERT INTO profile_tag (tag_id, profile_id)

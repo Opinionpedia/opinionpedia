@@ -79,14 +79,14 @@ export function getParam<T>(
 export function asNumber(value: string | undefined): number | null {
     // Cast required because TypeScript's signature for isNaN() says it only
     // takes a number.
-    const asNumber = value as unknown as number;
+    const asNumber = (value as unknown) as number;
 
     if (isNaN(asNumber)) {
         return null;
     }
 
     // Guaranteed to be a string that is parsable as a number.
-    return +(value!);
+    return +value!;
 }
 
 /**
@@ -136,7 +136,7 @@ function getBodyProps<BodyProperties>(
         bodyProperties[key] = value;
     }
 
-    return bodyProperties as unknown as BodyProperties;
+    return (bodyProperties as unknown) as BodyProperties;
 }
 
 export function validateBodyProps<BodyProperties>(

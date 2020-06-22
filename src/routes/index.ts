@@ -19,10 +19,7 @@ import { MySQLError } from '../errors.js';
 //    'http://localhost:3000': true,
 //};
 
-const allowedHeaders = [
-    'authorization',
-    'content-type',
-].join(', ');
+const allowedHeaders = ['authorization', 'content-type'].join(', ');
 
 const allowedMethods = [
     'GET',
@@ -117,8 +114,10 @@ function handleUnknownError(
     if (development) {
         res.status(500);
         res.type('txt');
-        res.send('Unknown error handling request. This shouldn\'t happen ' +
-                 'and is probably a bug! Please report it.');
+        res.send(
+            "Unknown error handling request. This shouldn't happen and is " +
+                'probably a bug! Please report it.'
+        );
     } else {
         res.sendStatus(500);
     }

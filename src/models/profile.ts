@@ -141,7 +141,7 @@ export async function getIPAddrProfileId(
         SELECT id FROM profile
         WHERE username = ${remoteAddress}`;
     const results = await conn.query(stmt);
-    const profiles = results.asRows() as { id: number; }[];
+    const profiles = results.asRows() as { id: number }[];
 
     // Check if the result is found or not.
     if (profiles.length !== 1) {
@@ -155,13 +155,7 @@ export async function createProfile(
     conn: Conn,
     profile: CreateProfile
 ): Promise<number> {
-    const {
-        username,
-        password,
-        salt,
-        description,
-        body,
-    } = profile;
+    const { username, password, salt, description, body } = profile;
 
     const stmt = SQL`
         INSERT INTO profile (username, password, salt, description, body)

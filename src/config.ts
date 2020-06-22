@@ -9,6 +9,8 @@ if (development) {
 } else if (production) {
     console.log('Running in production mode');
 } else {
-    console.warn('Not running in development or production mode, consider ' +
-                 'setting NODE_ENV to "development" or "production"');
+    console.warn(
+        'Not running in development or production mode, consider setting ' +
+            'NODE_ENV to "development" or "production"'
+    );
 }

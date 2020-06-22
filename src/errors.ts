@@ -2,14 +2,8 @@ interface Code {
     code: number | string;
 }
 
-export function hasCode(
-    err: any,
-    code: number | string
-): err is Error {
-    return (
-        (err as Code).code === code &&
-        err instanceof Error
-    );
+export function hasCode(err: any, code: number | string): err is Error {
+    return (err as Code).code === code && err instanceof Error;
 }
 
 export class MySQLError extends Error {

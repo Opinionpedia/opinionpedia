@@ -6,12 +6,16 @@ import SQL, { SQLStatement } from 'sql-template-strings';
 import { production } from './config.js';
 import { MySQLError, MySQLDriverError, hasCode } from './errors.js';
 
-if (process.env.DB_HOST === undefined ||
+if (
+    process.env.DB_HOST === undefined ||
     process.env.DB_USER === undefined ||
     process.env.DB_DATABASE === undefined ||
-    process.env.DB_PASSWORD === undefined) {
-    console.error('Error: Please set DB_HOST, DB_USER, DB_DATABASE, and ' +
-                  'DB_PASSWORD environment variables.');
+    process.env.DB_PASSWORD === undefined
+) {
+    console.error(
+        'Error: Please set DB_HOST, DB_USER, DB_DATABASE, and DB_PASSWORD ' +
+            'environment variables.'
+    );
     process.exit(1);
 }
 
@@ -112,14 +116,14 @@ function stringify(query: string | SQLStatement): string {
     // Complete hack.
     // SQLStatement.strings is private, so we cast to unknown to get around it.
 
-    const strings = (query as unknown as { strings: string[]; }).strings;
+    const strings = ((query as unknown) as { strings: string[] }).strings;
 
     function collapse(s: string): string {
         return s.replace(/\s\s+/g, ' ');
     }
 
     return strings.reduce((prev, curr, i) => {
-        return collapse(prev) + mysql.escape(values[i-1]) + collapse(curr);
+        return collapse(prev) + mysql.escape(values[i - 1]) + collapse(curr);
     });
 }
 
@@ -225,7 +229,8 @@ export class Conn {
                 if (hasCode(err, 'ECONNREFUSED') && attempts > 1) {
                     console.log(
                         `MySQL connection refused, retrying for ` +
-                        `${0.5 * (attempts-1)} more seconds...`);
+                            `${0.5 * (attempts - 1)} more seconds...`
+                    );
 
                     attempts -= 1;
                     await wait(500);

@@ -11,13 +11,11 @@
 import { Router } from 'express';
 
 import { getConn } from './db.js';
-
 import {
     NotOwnerError,
     ReferencedResourceNotFound,
     ResourceNotFoundError,
 } from './errors.js';
-
 import {
     notAvailableInProduction,
     validateBodyProps,
@@ -46,7 +44,7 @@ type DetailOptionReqBody = null;
 type DetailOptionResBody = model.Option;
 
 type CreateOptionReqBody = Omit<model.CreateOption, 'profile_id'>;
-type CreateOptionResBody = { option_id: number; };
+type CreateOptionResBody = { option_id: number };
 
 type ModifyOptionReqBody = Omit<
     model.UpdateOption,
@@ -56,130 +54,140 @@ type ModifyOptionResBody = null;
 
 export default (router: Router): void => {
     // List options handler
-    router.get('/', wrapAsync(async (req, res) => {
-        notAvailableInProduction();
+    router.get(
+        '/',
+        wrapAsync(async (req, res) => {
+            notAvailableInProduction();
 
-        const conn = await getConn(req);
-        const options: ListOptionsResBody = await model.getOptions(conn);
+            const conn = await getConn(req);
+            const options: ListOptionsResBody = await model.getOptions(conn);
 
-        res.json(options);
-    }));
+            res.json(options);
+        })
+    );
 
     // List options on question handler
-    router.get('/question/:question_id', wrapAsync(async (req, res) => {
-        const question_id = validateIdParam(req.params.question_id);
+    router.get(
+        '/question/:question_id',
+        wrapAsync(async (req, res) => {
+            const question_id = validateIdParam(req.params.question_id);
 
-        const conn = await getConn(req);
-        const options: ListOptionsByQuestionResBody =
-            await model.getOptionsByQuestionId(conn, question_id);
+            const conn = await getConn(req);
+            const options: ListOptionsByQuestionResBody = await model.getOptionsByQuestionId(
+                conn,
+                question_id
+            );
 
-        res.json(options);
-    }));
+            res.json(options);
+        })
+    );
 
     // Detail option handler
-    router.get('/:option_id', wrapAsync(async (req, res) => {
-        const option_id = validateIdParam(req.params.option_id);
+    router.get(
+        '/:option_id',
+        wrapAsync(async (req, res) => {
+            const option_id = validateIdParam(req.params.option_id);
 
-        const conn = await getConn(req);
-        const option: DetailOptionResBody | null =
-            await model.getOption(conn, option_id);
-        if (option === null) {
-            throw new ResourceNotFoundError();
-        }
+            const conn = await getConn(req);
+            const option: DetailOptionResBody | null = await model.getOption(
+                conn,
+                option_id
+            );
+            if (option === null) {
+                throw new ResourceNotFoundError();
+            }
 
-        res.json(option);
-    }));
+            res.json(option);
+        })
+    );
 
     // Create option handler
-    router.post('/', wrapAsync(async (req, res) => {
-        const {
-            question_id,
-            prompt,
-            description
-        } = validateBodyProps<CreateOptionReqBody>(
-            req.body,
-            {
+    router.post(
+        '/',
+        wrapAsync(async (req, res) => {
+            const { question_id, prompt, description } = validateBodyProps<
+                CreateOptionReqBody
+            >(req.body, {
                 question_id: model.isIdValid,
                 prompt: model.isPromptValid,
                 description: model.isDescriptionValid,
-            }
-        );
-
-        const { profile_id } = await validateRequestJWT(req);
-
-        // Get existing question.
-        const conn = await getConn(req);
-        const q = await question.getQuestion(conn, question_id);
-        if (q === null) {
-            // The question doesn't exist in the database.
-            throw new ReferencedResourceNotFound();
-        }
-
-        // Profiles can only create options on questions they own.
-        if (q.profile_id !== profile_id) {
-            throw new NotOwnerError();
-        }
-
-        let option_id;
-        try {
-            option_id = await model.createOption(conn, {
-                profile_id,
-                question_id,
-                prompt,
-                description,
             });
-        } catch (err) {
-            if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // Rare: The profile doesn't exist in the database.
+
+            const { profile_id } = await validateRequestJWT(req);
+
+            // Get existing question.
+            const conn = await getConn(req);
+            const q = await question.getQuestion(conn, question_id);
+            if (q === null) {
+                // The question doesn't exist in the database.
                 throw new ReferencedResourceNotFound();
-            } else {
-                throw err;
             }
-        }
 
-        const resBody: CreateOptionResBody = { option_id };
+            // Profiles can only create options on questions they own.
+            if (q.profile_id !== profile_id) {
+                throw new NotOwnerError();
+            }
 
-        res.json(resBody);
-    }));
+            let option_id;
+            try {
+                option_id = await model.createOption(conn, {
+                    profile_id,
+                    question_id,
+                    prompt,
+                    description,
+                });
+            } catch (err) {
+                if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
+                    // Rare: The profile doesn't exist in the database.
+                    throw new ReferencedResourceNotFound();
+                } else {
+                    throw err;
+                }
+            }
+
+            const resBody: CreateOptionResBody = { option_id };
+
+            res.json(resBody);
+        })
+    );
 
     // Modify option handler
-    router.patch('/:option_id', wrapAsync(async (req, res) => {
-        const option_id = validateIdParam(req.params.option_id);
-        const {
-            prompt,
-            description
-        } = validatePartialBodyProps<ModifyOptionReqBody>(
-            req.body,
-            {
+    router.patch(
+        '/:option_id',
+        wrapAsync(async (req, res) => {
+            const option_id = validateIdParam(req.params.option_id);
+            const { prompt, description } = validatePartialBodyProps<
+                ModifyOptionReqBody
+            >(req.body, {
                 prompt: model.isPromptValid,
                 description: model.isDescriptionValid,
+            });
+
+            const { profile_id } = await validateRequestJWT(req);
+
+            // Get existing option.
+            const conn = await getConn(req);
+            const option = await model.getOption(conn, option_id);
+            if (option === null) {
+                throw new ResourceNotFoundError();
             }
-        );
 
-        const { profile_id } = await validateRequestJWT(req);
+            if (option.profile_id !== profile_id) {
+                throw new NotOwnerError();
+            }
 
-        // Get existing option.
-        const conn = await getConn(req);
-        const option = await model.getOption(conn, option_id);
-        if (option === null) {
-            throw new ResourceNotFoundError();
-        }
+            // Apply requested changes.
+            if (prompt !== undefined) {
+                option.prompt = prompt;
+            }
 
-        if (option.profile_id !== profile_id) {
-            throw new NotOwnerError();
-        }
+            if (description !== undefined) {
+                option.description = description;
+            }
 
-        // Apply requested changes.
-        if (prompt !== undefined) {
-            option.prompt = prompt;
-        }
+            await model.updateOption(conn, option);
 
-        if (description !== undefined) {
-            option.description = description;
-        }
-
-        await model.updateOption(conn, option);
-
-        res.sendStatus(200);
-    }));
+            res.sendStatus(200);
+        })
+    );
 };

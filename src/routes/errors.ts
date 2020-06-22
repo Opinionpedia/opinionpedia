@@ -130,8 +130,10 @@ export class ResourceNotFoundError extends HTTP404NotFoundError {}
 export class UnknownDBError extends HTTP500InternalServerError {
     constructor(err: Error) {
         if (development) {
-            super('Unknown database error. This shouldn\'t happen and is ' +
-                  'probably a bug! Please report it.');
+            super(
+                "Unknown database error. This shouldn't happen and is " +
+                    'probably a bug! Please report it.'
+            );
         } else {
             super();
         }

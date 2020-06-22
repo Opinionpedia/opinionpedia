@@ -71,10 +71,7 @@ export async function getVotes(conn: Conn): Promise<Vote[]> {
     return votes;
 }
 
-export async function getVote(
-    conn: Conn,
-    id: number
-): Promise<Vote | null> {
+export async function getVote(conn: Conn, id: number): Promise<Vote | null> {
     const stmt = SQL`
         SELECT * FROM vote
         WHERE id = ${id}`;
@@ -128,10 +125,7 @@ export async function createVote(
     return id;
 }
 
-export async function updateVote(
-    conn: Conn,
-    vote: UpdateVote
-): Promise<void> {
+export async function updateVote(conn: Conn, vote: UpdateVote): Promise<void> {
     const {
         id,
 

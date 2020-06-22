@@ -13,12 +13,7 @@
 import { Router } from 'express';
 
 import { getConn } from './db.js';
-
-import {
-    NotOwnerError,
-    ResourceNotFoundError,
-} from './errors.js';
-
+import { NotOwnerError, ResourceNotFoundError } from './errors.js';
 import {
     notAvailableInProduction,
     validateBodyProps,
@@ -45,7 +40,7 @@ type DetailQuestionReqBody = null;
 type DetailQuestionResBody = model.Question;
 
 type CreateQuestionReqBody = Omit<model.CreateQuestion, 'profile_id'>;
-type CreateQuestionResBody = { question_id: number; };
+type CreateQuestionResBody = { question_id: number };
 
 type ModifyQuestionReqBody = Omit<model.UpdateQuestion, 'id' | 'profile_id'>;
 type ModifyQuestionResBody = null;
@@ -58,138 +53,155 @@ type VoteTableResBody = voteTable.VoteTable;
 
 export default (router: Router): void => {
     // List questions handler
-    router.get('/', wrapAsync(async (req, res) => {
-        notAvailableInProduction();
+    router.get(
+        '/',
+        wrapAsync(async (req, res) => {
+            notAvailableInProduction();
 
-        const conn = await getConn(req);
-        const questions: ListQuestionsResBody =
-            await model.getQuestions(conn);
+            const conn = await getConn(req);
+            const questions: ListQuestionsResBody = await model.getQuestions(
+                conn
+            );
 
-        res.json(questions);
-    }));
+            res.json(questions);
+        })
+    );
 
     // Detail question handler
-    router.get('/:question_id', wrapAsync(async (req, res) => {
-        const question_id = validateIdParam(req.params.question_id);
+    router.get(
+        '/:question_id',
+        wrapAsync(async (req, res) => {
+            const question_id = validateIdParam(req.params.question_id);
 
-        const conn = await getConn(req);
-        const question: DetailQuestionResBody | null =
-            await model.getQuestion(conn, question_id);
-        if (question === null) {
-            throw new ResourceNotFoundError();
-        }
+            const conn = await getConn(req);
+            const question: DetailQuestionResBody | null = await model.getQuestion(
+                conn,
+                question_id
+            );
+            if (question === null) {
+                throw new ResourceNotFoundError();
+            }
 
-        res.json(question);
-    }));
+            res.json(question);
+        })
+    );
 
     // Create question handler
-    router.post('/', wrapAsync(async (req, res) => {
-        const {
-            prompt,
-            description,
-        } = validateBodyProps<CreateQuestionReqBody>(
-            req.body,
-            {
+    router.post(
+        '/',
+        wrapAsync(async (req, res) => {
+            const { prompt, description } = validateBodyProps<
+                CreateQuestionReqBody
+            >(req.body, {
                 prompt: model.isPromptValid,
                 description: model.isDescriptionValid,
-            }
-        );
-
-        const { profile_id } = await validateRequestJWT(req);
-
-        const conn = await getConn(req);
-
-        let question_id;
-        try {
-            question_id = await model.createQuestion(conn, {
-                profile_id,
-                prompt,
-                description,
             });
-        } catch (err) {
-            if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // Rare: The profile doesn't exist in the database.
-                throw new ResourceNotFoundError();
-            } else {
-                throw err;
+
+            const { profile_id } = await validateRequestJWT(req);
+
+            const conn = await getConn(req);
+
+            let question_id;
+            try {
+                question_id = await model.createQuestion(conn, {
+                    profile_id,
+                    prompt,
+                    description,
+                });
+            } catch (err) {
+                if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
+                    // Rare: The profile doesn't exist in the database.
+                    throw new ResourceNotFoundError();
+                } else {
+                    throw err;
+                }
             }
-        }
 
-        const resBody: CreateQuestionResBody = { question_id };
+            const resBody: CreateQuestionResBody = { question_id };
 
-        res.json(resBody);
-    }));
+            res.json(resBody);
+        })
+    );
 
     // Modify question handler
-    router.patch('/:question_id', wrapAsync(async (req, res) => {
-        const question_id = validateIdParam(req.params.question_id);
-        const {
-            prompt,
-            description,
-        } = validatePartialBodyProps<ModifyQuestionReqBody>(
-            req.body,
-            {
+    router.patch(
+        '/:question_id',
+        wrapAsync(async (req, res) => {
+            const question_id = validateIdParam(req.params.question_id);
+            const { prompt, description } = validatePartialBodyProps<
+                ModifyQuestionReqBody
+            >(req.body, {
                 prompt: model.isPromptValid,
                 description: model.isDescriptionValid,
+            });
+
+            const { profile_id } = await validateRequestJWT(req);
+
+            // Get existing question.
+            const conn = await getConn(req);
+            const question = await model.getQuestion(conn, question_id);
+            if (question === null) {
+                throw new ResourceNotFoundError();
             }
-        );
 
-        const { profile_id } = await validateRequestJWT(req);
+            if (question.profile_id !== profile_id) {
+                throw new NotOwnerError();
+            }
 
-        // Get existing question.
-        const conn = await getConn(req);
-        const question = await model.getQuestion(conn, question_id);
-        if (question === null) {
-            throw new ResourceNotFoundError();
-        }
+            // Apply requested changes.
+            if (prompt !== undefined) {
+                question.prompt = prompt;
+            }
 
-        if (question.profile_id !== profile_id) {
-            throw new NotOwnerError();
-        }
+            if (description !== undefined) {
+                question.description = description;
+            }
 
-        // Apply requested changes.
-        if (prompt !== undefined) {
-            question.prompt = prompt;
-        }
+            await model.updateQuestion(conn, question);
 
-        if (description !== undefined) {
-            question.description = description;
-        }
-
-        await model.updateQuestion(conn, question);
-
-        res.sendStatus(200);
-    }));
+            res.sendStatus(200);
+        })
+    );
 
     // Get question suggestions handler
-    router.get('/:question_id/suggestions', wrapAsync(async (req, res) => {
-        const question_id = validateIdParam(req.params.question_id);
+    router.get(
+        '/:question_id/suggestions',
+        wrapAsync(async (req, res) => {
+            const question_id = validateIdParam(req.params.question_id);
 
-        const conn = await getConn(req);
-        const question = await model.getQuestion(conn, question_id);
-        if (question === null) {
-            throw new ResourceNotFoundError();
-        }
+            const conn = await getConn(req);
+            const question = await model.getQuestion(conn, question_id);
+            if (question === null) {
+                throw new ResourceNotFoundError();
+            }
 
-        const suggests: SuggestionsResBody =
-            await suggestions.getQuestionSuggestions(conn, question_id);
+            const suggests: SuggestionsResBody = await suggestions.getQuestionSuggestions(
+                conn,
+                question_id
+            );
 
-        res.json(suggests);
-    }));
+            res.json(suggests);
+        })
+    );
 
     // Get vote table handler
-    router.get('/:question_id/vote_table', wrapAsync(async (req, res) => {
-        const question_id = validateIdParam(req.params.question_id);
+    router.get(
+        '/:question_id/vote_table',
+        wrapAsync(async (req, res) => {
+            const question_id = validateIdParam(req.params.question_id);
 
-        const conn = await getConn(req);
-        const question = await model.getQuestion(conn, question_id);
-        if (question === null) {
-            throw new ResourceNotFoundError();
-        }
+            const conn = await getConn(req);
+            const question = await model.getQuestion(conn, question_id);
+            if (question === null) {
+                throw new ResourceNotFoundError();
+            }
 
-        const table: VoteTableResBody =
-            await voteTable.getVoteTable(conn, question_id);
+            const table: VoteTableResBody = await voteTable.getVoteTable(
+                conn,
+                question_id
+            );
 
-        res.json(table);
-    }));
+            res.json(table);
+        })
+    );
 };

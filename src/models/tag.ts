@@ -52,8 +52,10 @@ export function isDescriptionValid(value: unknown): boolean {
 }
 
 export function isCategoryValid(value: unknown): boolean {
-    return value === null ||
-        (typeof value === 'string' && value in VALID_CATEGORIES);
+    return (
+        value === null ||
+        (typeof value === 'string' && value in VALID_CATEGORIES)
+    );
 }
 
 export async function getTags(conn: Conn): Promise<Tag[]> {
@@ -64,10 +66,7 @@ export async function getTags(conn: Conn): Promise<Tag[]> {
     return tags;
 }
 
-export async function getTag(
-    conn: Conn,
-    id: number
-): Promise<Tag | null> {
+export async function getTag(conn: Conn, id: number): Promise<Tag | null> {
     const stmt = SQL`
         SELECT * FROM tag
         WHERE id = ${id}`;
@@ -82,10 +81,7 @@ export async function getTag(
     return tags[0];
 }
 
-export async function createTag(
-    conn: Conn,
-    tag: CreateTag
-): Promise<number> {
+export async function createTag(conn: Conn, tag: CreateTag): Promise<number> {
     const {
         profile_id,
 
@@ -105,10 +101,7 @@ export async function createTag(
     return id;
 }
 
-export async function updateTag(
-    conn: Conn,
-    tag: UpdateTag
-): Promise<void> {
+export async function updateTag(conn: Conn, tag: UpdateTag): Promise<void> {
     const {
         id,
 

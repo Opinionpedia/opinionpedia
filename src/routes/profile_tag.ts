@@ -8,12 +8,10 @@
 import { Router } from 'express';
 
 import { getConn } from './db.js';
-
 import {
     ReferencedResourceNotFound,
     ResourceAlreadyExistsDBError,
 } from './errors.js';
-
 import {
     validateBodyProps,
     validateIdParam,
@@ -21,10 +19,7 @@ import {
     wrapAsync,
 } from './util.js';
 
-import {
-    ERR_MYSQL_DUP_ENTRY,
-    ERR_MYSQL_NO_REFERENCED_ROW,
-} from '../db.js';
+import { ERR_MYSQL_DUP_ENTRY, ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 import { hasCode } from '../errors.js';
 
 import * as model from '../models/profile_tag.js';
@@ -40,46 +35,56 @@ type CreateProfileTagResBody = null;
 
 export default (router: Router): void => {
     // List tags on profile handler
-    router.get('/:profile_id', wrapAsync(async (req, res) => {
-        const profile_id = validateIdParam(req.params.profile_id);
+    router.get(
+        '/:profile_id',
+        wrapAsync(async (req, res) => {
+            const profile_id = validateIdParam(req.params.profile_id);
 
-        const conn = await getConn(req);
-        const tags: ListTagsOnProfileResBody =
-            await model.getTagsOnProfile(conn, profile_id);
+            const conn = await getConn(req);
+            const tags: ListTagsOnProfileResBody = await model.getTagsOnProfile(
+                conn,
+                profile_id
+            );
 
-        res.json(tags);
-    }));
+            res.json(tags);
+        })
+    );
 
     // Create profile tag handler
-    router.post('/', wrapAsync(async (req, res) => {
-        const { tag_id } = validateBodyProps<CreateProfileTagReqBody>(
-            req.body,
-            { tag_id: model.isIdValid }
-        );
+    router.post(
+        '/',
+        wrapAsync(async (req, res) => {
+            const { tag_id } = validateBodyProps<CreateProfileTagReqBody>(
+                req.body,
+                {
+                    tag_id: model.isIdValid,
+                }
+            );
 
-        // Must be logged in to create a profile tag. IP address profiles
-        // cannot have profile tags associated with them.
-        const { profile_id } = await validateRequestJWT(req);
+            // Must be logged in to create a profile tag. IP address profiles
+            // cannot have profile tags associated with them.
+            const { profile_id } = await validateRequestJWT(req);
 
-        const conn = await getConn(req);
+            const conn = await getConn(req);
 
-        try {
-            await model.createProfileTag(conn, {
-                tag_id,
-                profile_id,
-            });
-        } catch (err) {
-            if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
-                // This profile tag already existed.
-                throw new ResourceAlreadyExistsDBError();
-            } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
-                // The profile and/or tag doesn't exist in the database.
-                throw new ReferencedResourceNotFound();
-            } else {
-                throw err;
+            try {
+                await model.createProfileTag(conn, {
+                    tag_id,
+                    profile_id,
+                });
+            } catch (err) {
+                if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
+                    // This profile tag already existed.
+                    throw new ResourceAlreadyExistsDBError();
+                } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
+                    // The profile and/or tag doesn't exist in the database.
+                    throw new ReferencedResourceNotFound();
+                } else {
+                    throw err;
+                }
             }
-        }
 
-        res.sendStatus(200);
-    }));
+            res.sendStatus(200);
+        })
+    );
 };
