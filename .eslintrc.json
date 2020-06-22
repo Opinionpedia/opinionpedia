@@ -12,6 +12,7 @@
         "project": "tsconfig.json"
     },
     "plugins": ["prettier"],
+    "root": true,
     "rules": {
         "no-constant-condition": ["error", { "checkLoops": false }],
         "prettier/prettier": "error",
