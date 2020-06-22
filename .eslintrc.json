@@ -3,13 +3,18 @@
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "prettier",
+        "prettier/@typescript-eslint",
+        "plugin:prettier/recommended"
     ],
     "parserOptions": {
         "project": "tsconfig.json"
     },
+    "plugins": ["prettier"],
     "rules": {
         "no-constant-condition": ["error", { "checkLoops": false }],
+        "prettier/prettier": "error",
         "@typescript-eslint/explicit-function-return-type": "error",
         "@typescript-eslint/explicit-module-boundary-types": [
             "error",
