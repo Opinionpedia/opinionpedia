@@ -16,6 +16,8 @@
         "@typescript-eslint/eslint-plugin": "^3.1.0",
         "@typescript-eslint/parser": "^3.1.0",
         "eslint": "^7.1.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-prettier": "^3.1.4",
         "prettier": "^2.0.5",
         "typescript": "^3.9.2"
     },
@@ -25,7 +27,7 @@
         "watch": "tsc -w",
         "start-dev": "bash -c 'NODE_ENV=development node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
         "start-prod": "bash -c 'NODE_ENV=production node --experimental-modules --unhandled-rejections=strict -r dotenv/config build'",
-        "lint": "eslint src",
+        "lint": "eslint --format codeframe src",
         "test": "node --experimental-modules --unhandled-rejections=strict test.js"
     },
     "type": "module"
