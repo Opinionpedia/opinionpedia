@@ -408,7 +408,9 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}` }));
+    log(await get(200, { path: `/tag/id/${tag_id}` }));
+
+    log(await get(200, { path: `/tag/name/Name%20for%20${tagName2}` }));
 
     log(await patch(200, {
         path: `/tag/${tag_id}`,
@@ -419,7 +421,7 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}` }));
+    log(await get(200, { path: `/tag/id/${tag_id}` }));
 
     console.log('===================');
     console.log('TESTING PROFILE TAG');

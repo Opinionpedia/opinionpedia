@@ -66,10 +66,28 @@ export async function getTags(conn: Conn): Promise<Tag[]> {
     return tags;
 }
 
-export async function getTag(conn: Conn, id: number): Promise<Tag | null> {
+export async function getTagById(conn: Conn, id: number): Promise<Tag | null> {
     const stmt = SQL`
         SELECT * FROM tag
         WHERE id = ${id}`;
+    const results = await conn.query(stmt);
+    const tags = results.asRows() as Tag[];
+
+    // Check if the result is found or not.
+    if (tags.length !== 1) {
+        return null;
+    }
+
+    return tags[0];
+}
+
+export async function getTagByName(
+    conn: Conn,
+    name: string
+): Promise<Tag | null> {
+    const stmt = SQL`
+        SELECT * FROM tag
+        WHERE name = ${name}`;
     const results = await conn.query(stmt);
     const tags = results.asRows() as Tag[];
 

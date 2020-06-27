@@ -2,7 +2,8 @@
 // The endpoint are:
 //
 // List     GET   /api/tag
-// Details  GET   /api/tag/:tag_id
+// Details  GET   /api/tag/id/:tag_id
+// Details  GET   /api/tag/name/:tag_name
 // Create   POST  /api/tag
 // Modify   PATCH /api/tag/:tag_id
 //
@@ -56,16 +57,35 @@ export default (router: Router): void => {
         })
     );
 
-    // Detail tag handler
+    // Detail tag by id handler
     router.get(
-        '/:tag_id',
+        '/id/:tag_id',
         wrapAsync(async (req, res) => {
             const tag_id = validateIdParam(req.params.tag_id);
 
             const conn = await getConn(req);
-            const tag: DetailTagResBody | null = await model.getTag(
+            const tag: DetailTagResBody | null = await model.getTagById(
                 conn,
                 tag_id
+            );
+            if (tag === null) {
+                throw new ResourceNotFoundError();
+            }
+
+            res.json(tag);
+        })
+    );
+
+    // Detail tag by name handler
+    router.get(
+        '/name/:tag_name',
+        wrapAsync(async (req, res) => {
+            const tag_name = req.params.tag_name;
+
+            const conn = await getConn(req);
+            const tag: DetailTagResBody | null = await model.getTagByName(
+                conn,
+                tag_name
             );
             if (tag === null) {
                 throw new ResourceNotFoundError();
@@ -134,7 +154,7 @@ export default (router: Router): void => {
 
             // Get existing tag.
             const conn = await getConn(req);
-            const tag = await model.getTag(conn, tag_id);
+            const tag = await model.getTagById(conn, tag_id);
             if (tag === null) {
                 throw new ResourceNotFoundError();
             }

@@ -1355,16 +1355,16 @@ Response body: [
 
 
 
-Detail tag
------------
+Detail tag by id
+----------------
 
-Get details for a tag.
+Get details for a tag by id.
 
 The profile\_id for a tag is its owner.
 
 ```
 Method: GET
-Path: /api/tag/:tag_id
+Path: /api/tag/id/:tag_id
 Params: {
     tag_id: number;
 }
@@ -1385,7 +1385,51 @@ Possible errors:
 Example:
 
 ```
-URL: GET http://localhost:4000/api/tag/2
+URL: GET http://localhost:4000/api/tag/id/2
+
+Response body: {
+    "id": 1,
+    "profile_id": 11,
+    "name": "Age: 40-49",
+    "description": "This user's age is between 40 and 49",
+    "category": "identity",
+    "created": "2020-06-20T23:00:00.000Z",
+    "updated": "2020-06-20T23:00:00.000Z"
+}
+```
+
+
+Detail tag by name
+------------------
+
+Get details for a tag by name.
+
+The profile\_id for a tag is its owner.
+
+```
+Method: GET
+Path: /api/tag/name/:tag_name
+Params: {
+    tag_name: string;
+}
+
+Response body: {
+    id: number;
+    profile_id: number;
+    name: string;
+    description: string | null;
+    category: string | null;
+    created: string;
+    updated: string;
+}
+Possible errors:
+  - HTTP 404: Not found
+```
+
+Example:
+
+```
+URL: GET http://localhost:4000/api/tag/name/ethics
 
 Response body: {
     "id": 1,
@@ -1676,7 +1720,7 @@ Profiles that are not the owner of a question can still add tags to it.
 
 ```
 Method: POST
-Path: /api/vote
+Path: /api/tag/question
 Headers: {
     Authorization: string;
 }
@@ -1695,7 +1739,7 @@ Possible errors:
 Example:
 
 ```
-URL: POST http://localhost:4000/api/vote
+URL: POST http://localhost:4000/api/tag/question
 Headers: {
     Authorization: "Bearer my.jwt.here"
 }
