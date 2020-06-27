@@ -3,8 +3,8 @@ CREATE TABLE profile (
                       AUTO_INCREMENT,
 
     username      VARCHAR(300) NOT NULL,
-    password      CHAR(128) NOT NULL,
-    salt          CHAR(32) NOT NULL,
+    password      CHAR(128),
+    salt          CHAR(32),
 
     description   TEXT,
     body          TEXT,

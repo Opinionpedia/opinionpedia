@@ -1,15 +1,20 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
 
+import { getConn } from './db.js';
 import {
+    InvalidAuthorizationError,
     InvalidParametersError,
-    MissingAuthenticationError,
+    HTTP500InternalServerError,
+    MissingAuthorizationError,
     NotAvailableInProductionError,
 } from './errors.js';
 
 import { Token, verifyJWT } from '../auth.js';
-
 import { production } from '../config.js';
+import { ERR_MYSQL_DUP_ENTRY } from '../db.js';
+import { hasCode } from '../errors.js';
 
+import * as profileModel from '../models/profile.js';
 import { isId } from '../models/util.js';
 
 /**
@@ -74,14 +79,14 @@ export function getParam<T>(
 export function asNumber(value: string | undefined): number | null {
     // Cast required because TypeScript's signature for isNaN() says it only
     // takes a number.
-    const asNumber = value as unknown as number;
+    const asNumber = (value as unknown) as number;
 
     if (isNaN(asNumber)) {
         return null;
     }
 
     // Guaranteed to be a string that is parsable as a number.
-    return +(value!);
+    return +value!;
 }
 
 /**
@@ -113,10 +118,10 @@ export function validateIdParam(value: string | undefined): number {
 type BodyValidator = (value: unknown) => boolean;
 
 function getBodyProps<BodyProperties>(
-    body: any,
+    body: { [prop: string]: unknown },
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
 ): BodyProperties | null {
-    const bodyProperties: any = {};
+    const bodyProperties: { [prop: string]: unknown } = {};
 
     for (const key in validators) {
         const value: unknown = body[key];
@@ -131,7 +136,7 @@ function getBodyProps<BodyProperties>(
         bodyProperties[key] = value;
     }
 
-    return bodyProperties as BodyProperties;
+    return (bodyProperties as unknown) as BodyProperties;
 }
 
 export function validateBodyProps<BodyProperties>(
@@ -147,10 +152,10 @@ export function validateBodyProps<BodyProperties>(
 }
 
 function getPartialBodyProps<BodyProperties>(
-    body: any,
+    body: { [prop: string]: unknown },
     validators: { [PropertyName in keyof BodyProperties]: BodyValidator }
 ): Partial<BodyProperties> | null {
-    const bodyProperties: any = {};
+    const bodyProperties: { [prop: string]: unknown } = {};
 
     for (const key in validators) {
         const value: unknown = body[key];
@@ -205,23 +210,132 @@ function getAuthToken(req: Request): string | null {
 }
 
 /**
- * Validate an authentication token in the Authorization header on an HTTP
+ * Retrieves the payload of a JWT token in the Authorization header on an HTTP
  * request.
  *
- * @param req - The HTTP request
- * @returns A Promise with either the decoded token
- * @throws
+ * @param req - the HTTP request
+ * @returns the JWT's payload
+ *
+ * @throws {@link MissingAuthorizationError}
+ * Thrown if the request did not include an Authorization header.
+ *
+ * @throws {@link InvalidAuthorizationError}
+ * Thrown if the Authorization header was malformed or contained an invalid
+ * value.
  */
 export async function validateRequestJWT(req: Request): Promise<Token> {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+        throw new MissingAuthorizationError();
+    }
+
     const token = getAuthToken(req);
     if (token === null) {
-        throw new MissingAuthenticationError();
+        throw new InvalidAuthorizationError();
     }
 
     const payload = await verifyJWT(token);
     if (payload === null) {
-        throw new MissingAuthenticationError();
+        throw new InvalidAuthorizationError();
     }
 
     return payload;
+}
+
+/**
+ * Attempts to find or create a profile for an HTTP request.
+ *
+ * If the request has an "Authorization" header, it is assumed to contain a JWT
+ * and validation/decoding is performed. This should be the case for logged in
+ * users.
+ *
+ * Otherwise, the request's remote IP address is used to find or create (if it
+ * didn't already exist) a so-called IP address profile.
+ *
+ * @param req - the HTTP request
+ * @returns a profile ID to use for authorizing actions in the request
+ *
+ * @throws {@link InvalidAuthorizationError}
+ * Thrown if an Authorization header was provided but was malformed or
+ * contained an invalid value.
+ */
+export async function getProfileID(req: Request): Promise<number> {
+    const authorization = req.headers.authorization;
+    if (authorization) {
+        // If an Authorization header was provided, never try to use an IP
+        // address profile.
+        const token = getAuthToken(req);
+        if (!token) {
+            throw new InvalidAuthorizationError();
+        }
+
+        // TODO: Great place for an LRU cache. The profile ID for a JWT will
+        //       never change. It will expire (expiration time included in JWT
+        //       payload), but that can be inserted into the cache, too.
+        const payload = await verifyJWT(token);
+        if (payload === null) {
+            throw new InvalidAuthorizationError();
+        }
+
+        return payload.profile_id;
+    } else {
+        // The request is from an anonymous user. Use an IP address profile.
+        const { remoteAddress } = req.socket;
+        if (remoteAddress === undefined) {
+            // Rare: Client disconnected, Node has scrubbed what their IP
+            //       address was. We cannot progress.
+            //
+            // Technically it shouldn't matter what we throw here because no
+            // response will be able to be sent back to the client anyway...
+            throw new MissingAuthorizationError();
+        }
+
+        if (!profileModel.isIPValid(remoteAddress)) {
+            // Rare: If this fails, it means our IP-checking regex is invalid
+            //       and a user could create a profile with a username that is
+            //       an IP address, which would cause problems.
+            throw new HTTP500InternalServerError();
+        }
+
+        // TODO: Great place for an LRU cache. The profile ID for a remote
+        //       address will never change.
+        const profile_id = await getIPAddrProfile(req, remoteAddress);
+        if (profile_id !== null) {
+            return profile_id;
+        }
+
+        return await createIPAddrProfile(req, remoteAddress);
+    }
+}
+
+async function getIPAddrProfile(
+    req: Request,
+    remoteAddress: string
+): Promise<number | null> {
+    const conn = await getConn(req);
+    return await profileModel.getIPAddrProfileId(conn, remoteAddress);
+}
+
+async function createIPAddrProfile(
+    req: Request,
+    remoteAddress: string
+): Promise<number> {
+    const conn = await getConn(req);
+
+    let profile_id: number;
+    try {
+        profile_id = await profileModel.createIPAddrProfile(
+            conn,
+            remoteAddress
+        );
+    } catch (err) {
+        if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
+            // Maybe the profile was created in a concurrent request??
+            throw new HTTP500InternalServerError();
+        } else {
+            throw err;
+        }
+    }
+
+    return profile_id;
 }

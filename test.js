@@ -3,8 +3,10 @@ import http from 'http';
 /**
  * Make an HTTP request to the backend server.
  */
-function request({ method, path, token, body }) {
-    const options = {
+function request(options) {
+    const { method, path, token, body } = options;
+
+    const httpOptions = {
         host: 'localhost',
         port: 4000,
         method,
@@ -15,14 +17,14 @@ function request({ method, path, token, body }) {
     };
 
     if (token) {
-        options.headers.Authorization = `Bearer ${token}`;
+        httpOptions.headers.Authorization = `Bearer ${token}`;
     }
 
     const reqJson = body;
     const reqText = body && JSON.stringify(body, null, 4);
 
     return new Promise((resolve, reject) => {
-        const req = http.request(options);
+        const req = http.request(httpOptions);
 
         req.on('response', (res) => {
             let resText = '';
@@ -59,11 +61,26 @@ function request({ method, path, token, body }) {
             });
         });
 
-        req.on('error', reject);
+        req.on(
+            'error',
+            (err) => reject(
+                new Error(`${err}: ${JSON.stringify(options)}`)
+            )
+        );
+
+        req.on(
+            'timeout',
+            () => reject(
+                new Error(`Request timeout: ${JSON.stringify(options)}`)
+            )
+        );
 
         if (reqText) {
             req.write(reqText);
         }
+
+        const second = 1000;
+        req.setTimeout(5 * second);
 
         req.end();
     });
@@ -118,7 +135,8 @@ async function tryRequest(statusCode, options) {
     if (res.statusCode !== statusCode) {
         log(res);
         throw new Error(
-            `Expected HTTP status to be ${statusCode}, got ${res.statusCode}`);
+            `Expected HTTP status to be ${statusCode}, got ${res.statusCode}`
+        );
     }
 
     return res;
@@ -142,6 +160,13 @@ function patch(statusCode, options) {
     return tryRequest(
         statusCode,
         Object.assign({}, options, { method: 'PATCH' })
+    );
+}
+
+function del(statusCode, options) {
+    return tryRequest(
+        statusCode,
+        Object.assign({}, options, { method: 'DELETE' })
     );
 }
 
@@ -264,7 +289,6 @@ async function test() {
         path: '/vote',
         token,
         body: {
-            profile_id,
             question_id,
             option_id,
             header: 1,
@@ -274,9 +298,24 @@ async function test() {
         },
     });
     log(res);
-    const { vote_id } = res.json;
+    let { vote_id } = res.json;
 
-    log(await get(200, { path: `/vote/${vote_id}`}));
+    res = await post(200, {
+        path: '/vote',
+        token: undefined,
+        body: {
+            question_id,
+            option_id,
+            header: null,
+            body: null,
+            description: 'Vote from an IP address',
+            active: 0,
+        },
+    });
+    log(res);
+    let ipVoteId = res.json.vote_id;
+
+    log(await get(200, { path: `/vote/${vote_id}` }));
 
     log(await patch(200, {
         path: `/vote/${vote_id}`,
@@ -289,9 +328,37 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/vote/${vote_id}`}));
+    log(await patch(200, {
+        path: `/vote/${ipVoteId}`,
+        token: undefined,
+        body: {
+            description: 'Updated vote from an IP address',
+        },
+    }));
 
-    log(await get(200, { path: `/vote/question/${question_id}`}));
+    log(await get(200, { path: `/vote/${vote_id}` }));
+
+    log(await get(200, { path: `/vote/question/${question_id}` }));
+
+    log(await del(200, { path: `/vote/${vote_id}`, token }));
+
+    log(await del(200, { path: `/vote/${ipVoteId}`, token: undefined }));
+
+    res = await post(200, {
+        path: '/vote',
+        token,
+        body: {
+            profile_id,
+            question_id,
+            option_id,
+            header: 1,
+            body: null,
+            description: 'Second vote after first was deleted',
+            active: 3,
+        },
+    });
+    log(res);
+    vote_id = res.json.vote_id;
 
     console.log('===========');
     console.log('TESTING TAG');
@@ -341,7 +408,9 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/id/${tag_id}` }));
+
+    log(await get(200, { path: `/tag/name/Name%20for%20${tagName2}` }));
 
     log(await patch(200, {
         path: `/tag/${tag_id}`,
@@ -352,7 +421,7 @@ async function test() {
         },
     }));
 
-    log(await get(200, { path: `/tag/${tag_id}`}));
+    log(await get(200, { path: `/tag/id/${tag_id}` }));
 
     console.log('===================');
     console.log('TESTING PROFILE TAG');
@@ -364,7 +433,7 @@ async function test() {
         body: { tag_id },
     }));
 
-    log(await get(200, { path: `/tag/profile/${profile_id}`}));
+    log(await get(200, { path: `/tag/profile/${profile_id}` }));
 
     console.log('====================');
     console.log('TESTING QUESTION TAG');
@@ -376,7 +445,9 @@ async function test() {
         body: { tag_id, question_id },
     }));
 
-    log(await get(200, { path: `/tag/question/${question_id}`}));
+    log(await get(200, { path: `/tag/question/${tag_id}/questions` }));
+
+    log(await get(200, { path: `/tag/question/${question_id}/tags` }));
 
     console.log('===================');
     console.log('TESTING SUGGESTIONS');
@@ -391,4 +462,7 @@ async function test() {
     log(await get(200, { path: `/question/${question_id}/vote_table` }));
 }
 
-test();
+test().catch((err) => {
+    console.error(err);
+    process.exit(1);
+});

@@ -51,7 +51,7 @@ export async function closeDatabase(
     res: Response,
     next: NextFunction
 ): Promise<void> {
-    const req2 = req as unknown as RequestWithConn;
+    const req2 = (req as unknown) as RequestWithConn;
 
     if (req2.conn) {
         await closeConn(req2.conn);
@@ -61,7 +61,7 @@ export async function closeDatabase(
 }
 
 export async function getConn(req: Request): Promise<Conn> {
-    const req2 = req as unknown as RequestWithConn;
+    const req2 = (req as unknown) as RequestWithConn;
 
     if (!req2.conn) {
         req2.conn = await openConn();

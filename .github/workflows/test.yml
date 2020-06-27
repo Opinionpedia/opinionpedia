@@ -1,0 +1,93 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: yarn test
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.cache/yarn
+        key: ${{ hashFiles('yarn.lock') }}
+
+    - name: Install dependencies
+      run: |
+        yarn install --frozen-lockfile
+
+    - name: Build
+      run: |
+        yarn lint
+        yarn build
+
+    - name: Start MySQL
+      run: |
+        # Start MySQL 5.7
+        sudo systemctl start mysql.service
+
+        # Create table "test"
+        # This blocks until MySQL is finished booting up
+        mysql -uroot \
+              -proot \
+              -e "CREATE DATABASE test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+    - name: Run tests
+      env:
+        CI: true
+        HTTP_PORT: 4000
+        JWT_SECRET: mysecret
+        DB_HOST: localhost
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_DATABASE: test
+      run: |
+        # Start backend server
+        yarn start-dev > log.txt 2>&1 &
+
+        # Wait for backend server to be ready
+        for i in $(seq 1 60); do
+            sleep 1
+
+            # Check if the server died.
+            if ! pidof node >/dev/null; then
+                echo 'Error: Backend has quit'
+                echo
+                cat log.txt
+                exit 1
+            fi
+
+            # Check if the server is accepting connections.
+            if nc -z localhost ${HTTP_PORT}; then
+                ok=1
+                break
+            fi
+        done
+
+        # Did we timeout? Then it's an error.
+        if [ -z "$ok" ]; then
+            echo 'Error: Timeout after 60 seconds'
+            echo
+            cat log.txt
+            exit 1
+        fi
+
+        if ! yarn test; then
+            echo
+            echo 'Backend log:'
+            cat log.txt
+            echo
+            echo 'Error: Test failed'
+            exit 1
+        fi

@@ -19,10 +19,7 @@ import { MySQLError } from '../errors.js';
 //    'http://localhost:3000': true,
 //};
 
-const allowedHeaders = [
-    'authorization',
-    'content-type',
-].join(', ');
+const allowedHeaders = ['authorization', 'content-type'].join(', ');
 
 const allowedMethods = [
     'GET',
@@ -58,7 +55,7 @@ function handleNoSuchRoute(
     res: Response,
     next: NextFunction
 ): void {
-    if (!req.complete) {
+    if (!res.headersSent) {
         console.error('Route not found');
 
         res.status(400);
@@ -88,7 +85,7 @@ function handleHTTPError(
     res: Response,
     next: NextFunction
 ): void {
-    if (err instanceof HTTPError) {
+    if (err instanceof HTTPError && err.statusMessage) {
         const { statusCode, statusMessage, message } = err;
         if (message) {
             console.error(`HTTP ${statusCode} ${statusMessage}: ${message}`);
@@ -117,8 +114,10 @@ function handleUnknownError(
     if (development) {
         res.status(500);
         res.type('txt');
-        res.send('Unknown error handling request. This shouldn\'t happen ' +
-                 'and is probably a bug! Please report it.');
+        res.send(
+            "Unknown error handling request. This shouldn't happen and is " +
+                'probably a bug! Please report it.'
+        );
     } else {
         res.sendStatus(500);
     }

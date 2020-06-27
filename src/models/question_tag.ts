@@ -10,8 +10,10 @@ export interface QuestionTag {
     question_id: number;
 }
 
-export type TagOnQuestion =
-    { tag_id: number; } & Pick<Tag, 'name' | 'description'>;
+export type TagOnQuestion = { tag_id: number } & Pick<
+    Tag,
+    'name' | 'description' | 'category'
+>;
 
 export const isIdValid = isId;
 
@@ -20,7 +22,7 @@ export async function getTagsOnQuestion(
     question_id: number
 ): Promise<TagOnQuestion[]> {
     const stmt = SQL`
-        SELECT tag_id, name, description
+        SELECT tag_id, name, description, category
         FROM question_tag
              JOIN
              tag ON question_tag.tag_id = tag.id
@@ -31,14 +33,30 @@ export async function getTagsOnQuestion(
     return questionTags;
 }
 
+export async function getQuestionsWithTag(
+    conn: Conn,
+    tag_id: number
+): Promise<number[]> {
+    const stmt = SQL`
+        SELECT question_id
+        FROM question_tag
+        WHERE tag_id = ${tag_id}`;
+    const results = await conn.query(stmt);
+    const question_tags = results.asRows() as { question_id: number }[];
+
+    const ids: number[] = [];
+    for (const question_tag of question_tags) {
+        ids.push(question_tag.question_id);
+    }
+
+    return ids;
+}
+
 export async function createQuestionTag(
     conn: Conn,
     questionTag: QuestionTag
 ): Promise<void> {
-    const {
-        tag_id,
-        question_id,
-    } = questionTag;
+    const { tag_id, question_id } = questionTag;
 
     const stmt = SQL`
         INSERT INTO question_tag (tag_id, question_id)

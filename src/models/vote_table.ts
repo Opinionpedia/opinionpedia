@@ -42,20 +42,24 @@ export async function getVoteTable(
 
     for (const option_id of optionIds) {
         table[option_id] = {
-            total: 0
+            total: 0,
         };
     }
 
-    const optionCounts: OptionVoteCounts =
-        await countVotesByOptionIdOnQuestion(conn, question_id);
+    const optionCounts = await countVotesByOptionIdOnQuestion(
+        conn,
+        question_id
+    );
 
     for (const { option_id, count } of optionCounts) {
         table[option_id].total = count;
     }
 
     for await (const option_id of optionIds) {
-        const tagIdCounts: TagIdVoteCounts =
-            await countVotesByProfileTagOnOption(conn, option_id);
+        const tagIdCounts = await countVotesByProfileTagOnOption(
+            conn,
+            option_id
+        );
 
         for (const { tag_id, count } of tagIdCounts) {
             table[option_id][tag_id] = count;
