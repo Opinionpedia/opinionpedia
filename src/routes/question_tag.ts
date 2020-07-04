@@ -56,9 +56,9 @@ export default (router: Router): void => {
 
     // List questions with tag handler
     router.get(
-        '/:question_id/questions',
+        '/:tag_id/questions',
         wrapAsync(async (req, res) => {
-            const tag_id = validateIdParam(req.params.question_id);
+            const tag_id = validateIdParam(req.params.tag_id);
 
             const conn = await getConn(req);
             const questionIds: ListQuestionsWithTagResBody = await model.getQuestionsWithTag(
