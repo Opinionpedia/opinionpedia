@@ -57,15 +57,15 @@ export async function countQuestionsWithTag(
     tag_id: number
 ): Promise<number> {
     const stmt = SQL`
-        SELECT COUNT(question_id)
+        SELECT COUNT(question_id) AS count
         FROM question_tag
         WHERE tag_id = ${tag_id}`;
     const results = await conn.query(stmt);
-    const question_tags = results.asRows() as { question_id: number }[];
+    const question_tags = results.asRows() as { count: number }[];
 
     let count = 0;
     for (const question_tag of question_tags) {
-        count = question_tag.question_id;
+        count = question_tag.count;
     }
 
     return count;
