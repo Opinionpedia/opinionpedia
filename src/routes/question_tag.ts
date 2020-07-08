@@ -55,7 +55,6 @@ export default (router: Router): void => {
         })
     );
 
-
     // get number of questions with tag handler
     router.get(
         '/:tag_id/count',
@@ -87,7 +86,6 @@ export default (router: Router): void => {
             res.json(questionIds);
         })
     );
-
 
     // Create question tag handler
     router.post(
