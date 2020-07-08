@@ -3,6 +3,7 @@
 //
 // List    GET   /api/tag/question/:question_id/tags
 // List    GET   /api/tag/question/:tag_id/questions
+// Number  GET   /api/tag/question/:tag_id/count
 // Create  POST  /api/tag/question
 //
 
@@ -54,6 +55,23 @@ export default (router: Router): void => {
         })
     );
 
+
+    // get number of questions with tag handler
+    router.get(
+        '/:tag_id/count',
+        wrapAsync(async (req, res) => {
+            const tag_id = validateIdParam(req.params.tag_id);
+
+            const conn = await getConn(req);
+            const count: number = await model.countQuestionsWithTag(
+                conn,
+                tag_id
+            );
+
+            res.json(count);
+        })
+    );
+
     // List questions with tag handler
     router.get(
         '/:tag_id/questions',
@@ -69,6 +87,7 @@ export default (router: Router): void => {
             res.json(questionIds);
         })
     );
+
 
     // Create question tag handler
     router.post(

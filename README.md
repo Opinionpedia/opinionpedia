@@ -1709,6 +1709,35 @@ Response body: [
 ]
 ```
 
+Count questions with tag
+-----------------------
+
+Get list of ids of every question tagged with a particular tag.
+
+If the tag does not exist it returns an empty array.
+
+```
+Method: GET
+Path: /api/tag/question/:tag_id/count
+Params: {
+    tag_id: number;
+}
+
+Response body: number
+Possible errors:
+  - None
+```
+
+Example:
+
+```
+URL: GET http://localhost:4000/api/tag/question/21/count
+
+Response body: [
+    81
+]
+```
+
 
 
 Create question tag

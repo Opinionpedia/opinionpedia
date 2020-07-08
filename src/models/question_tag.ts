@@ -52,6 +52,25 @@ export async function getQuestionsWithTag(
     return ids;
 }
 
+export async function countQuestionsWithTag(
+    conn: Conn,
+    tag_id: number
+): Promise<number> {
+    const stmt = SQL`
+        SELECT COUNT(question_id)
+        FROM question_tag
+        WHERE tag_id = ${tag_id}`;
+    const results = await conn.query(stmt);
+    const question_tags = results.asRows() as { question_id: number }[];
+
+    let count: number = 0;
+    for (const question_tag of question_tags) {
+        count = question_tag.question_id;
+    }
+
+    return count;
+}
+
 export async function createQuestionTag(
     conn: Conn,
     questionTag: QuestionTag

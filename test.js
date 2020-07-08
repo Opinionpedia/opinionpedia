@@ -449,6 +449,8 @@ async function test() {
 
     log(await get(200, { path: `/tag/question/${question_id}/tags` }));
 
+    log(await get(200, { path: `/tag/question/${tag_id}/count` }));
+
     console.log('===================');
     console.log('TESTING SUGGESTIONS');
     console.log('===================');
