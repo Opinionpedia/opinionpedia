@@ -615,7 +615,7 @@ Params: {
     question_id: number;
 }
 
-Response body: number[];
+Response body: Question[];
 Possible errors:
   - HTTP 404: Resource not found
 ```
@@ -626,9 +626,30 @@ Example:
 URL: GET http://localhost:4000/api/question/123/suggestions
 
 Response body: [
-    1072,
-    12,
-    889
+    {
+        id: 1,
+        profile_id: 5,
+        prompt: "What is your favorite children's book?",
+        description: "I'm looking for ideas for my niece.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {
+        id: 2,
+        profile_id: 5,
+        prompt: "Are landscape photos better at sunrise or sunset?",
+        description: "I've been wondering about this for a while.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {
+        id: 3,
+        profile_id: 5,
+        prompt: "Are lunchables better that a PB&J sandwich?",
+        description: "I've been wondering about this for a while.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
 ]
 ```
 

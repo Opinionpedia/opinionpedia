@@ -1,12 +1,14 @@
 import SQL from 'sql-template-strings';
 
 import { QuestionTag } from './question_tag.js';
+import { getQuestion, Question } from './question.js';
+import { ResourceNotFoundError } from '../routes/errors.js';
 
 import { Conn } from '../db.js';
 
 const MAXIMUM_QUESTION_SUGGESTIONS = 3;
 
-export type SuggestedQuestionIds = number[];
+export type SuggestedQuestionIds = Question[];
 
 export async function getQuestionSuggestions(
     conn: Conn,
@@ -61,20 +63,22 @@ async function getQuestionsWithTags(
     numTags: number,
     not_question_id: number,
     limit: number
-): Promise<number[]> {
+): Promise<Question[]> {
     const stmt = SQL`
-        SELECT question_id
-        FROM question_tag
-        WHERE question_id != ${not_question_id} AND
-              tag_id IN (${tagIds})
-        GROUP BY question_id
+        SELECT question.*
+        FROM question_tag 
+        LEFT JOIN question ON question_id=question.id
+        WHERE question.id != ${not_question_id} AND
+              question.id IN (${tagIds})
+        GROUP BY question.id
         HAVING COUNT(1) = ${numTags}
         ORDER BY RAND()
         LIMIT ${limit}`;
     const results = await conn.query(stmt);
-    const questionTags = results.asRows() as Pick<QuestionTag, 'question_id'>[];
 
-    const questionIds = questionTags.map((qTag) => qTag.question_id);
-
-    return questionIds;
+    const questions = results.asRows() as Pick<
+        Question,
+        'id' | 'profile_id' | 'prompt' | 'description' | 'created' | 'updated'
+    >[];
+    return questions;
 }
