@@ -43,7 +43,7 @@ export async function getQuestionsWithTag(
         FROM question
          RIGHT JOIN question_tag ON question.id=question_tag.question_id
         WHERE question_tag.tag_id = ${tag_id};
-        `
+        `;
     const results = await conn.query(stmt);
     const questions = results.asRows() as Question[];
 
