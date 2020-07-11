@@ -4,6 +4,7 @@ import { isId } from './util.js';
 import { Tag } from './tag.js';
 
 import { Conn } from '../db.js';
+import { Question } from './question.js';
 
 export interface QuestionTag {
     tag_id: number;
@@ -36,20 +37,17 @@ export async function getTagsOnQuestion(
 export async function getQuestionsWithTag(
     conn: Conn,
     tag_id: number
-): Promise<number[]> {
+): Promise<Question[]> {
     const stmt = SQL`
-        SELECT question_id
-        FROM question_tag
-        WHERE tag_id = ${tag_id}`;
+        SELECT question.*
+        FROM question
+         RIGHT JOIN question_tag ON question.id=question_tag.question_id
+        WHERE question_tag.tag_id = ${tag_id};
+        `
     const results = await conn.query(stmt);
-    const question_tags = results.asRows() as { question_id: number }[];
+    const questions = results.asRows() as Question[];
 
-    const ids: number[] = [];
-    for (const question_tag of question_tags) {
-        ids.push(question_tag.question_id);
-    }
-
-    return ids;
+    return questions;
 }
 
 export async function countQuestionsWithTag(

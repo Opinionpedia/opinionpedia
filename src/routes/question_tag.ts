@@ -24,18 +24,19 @@ import {
 import { ERR_MYSQL_DUP_ENTRY, ERR_MYSQL_NO_REFERENCED_ROW } from '../db.js';
 import { hasCode } from '../errors.js';
 
-import * as model from '../models/question_tag.js';
+import * as tagModel from '../models/question_tag.js';
+import * as questionModel from '../models/question.js';
 
 //
 // Request body types
 //
 type ListTagsOnQuestionReqBody = null;
-type ListTagsOnQuestionResBody = model.TagOnQuestion[];
+type ListTagsOnQuestionResBody = tagModel.TagOnQuestion[];
 
 type ListQuestionsWithTagReqBody = null;
-type ListQuestionsWithTagResBody = number[];
+type ListQuestionsWithTagResBody = questionModel.Question[];
 
-type CreateQuestionTagReqBody = model.QuestionTag;
+type CreateQuestionTagReqBody = tagModel.QuestionTag;
 type CreateQuestionTagResBody = null;
 
 export default (router: Router): void => {
@@ -46,7 +47,7 @@ export default (router: Router): void => {
             const question_id = validateIdParam(req.params.question_id);
 
             const conn = await getConn(req);
-            const tags: ListTagsOnQuestionResBody = await model.getTagsOnQuestion(
+            const tags: ListTagsOnQuestionResBody = await tagModel.getTagsOnQuestion(
                 conn,
                 question_id
             );
@@ -62,7 +63,7 @@ export default (router: Router): void => {
             const tag_id = validateIdParam(req.params.tag_id);
 
             const conn = await getConn(req);
-            const count: number = await model.countQuestionsWithTag(
+            const count: number = await tagModel.countQuestionsWithTag(
                 conn,
                 tag_id
             );
@@ -78,7 +79,7 @@ export default (router: Router): void => {
             const tag_id = validateIdParam(req.params.tag_id);
 
             const conn = await getConn(req);
-            const questionIds: ListQuestionsWithTagResBody = await model.getQuestionsWithTag(
+            const questionIds: ListQuestionsWithTagResBody = await tagModel.getQuestionsWithTag(
                 conn,
                 tag_id
             );
@@ -94,8 +95,8 @@ export default (router: Router): void => {
             const { tag_id, question_id } = validateBodyProps<
                 CreateQuestionTagReqBody
             >(req.body, {
-                tag_id: model.isIdValid,
-                question_id: model.isIdValid,
+                tag_id: tagModel.isIdValid,
+                question_id: tagModel.isIdValid,
             });
 
             // Must be logged in to tag a question.
@@ -104,7 +105,7 @@ export default (router: Router): void => {
             const conn = await getConn(req);
 
             try {
-                await model.createQuestionTag(conn, {
+                await tagModel.createQuestionTag(conn, {
                     tag_id,
                     question_id,
                 });

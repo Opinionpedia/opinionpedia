@@ -1702,7 +1702,7 @@ Response body: [
 List questions with tag
 -----------------------
 
-Get list of ids of every question tagged with a particular tag.
+Get list of question objects of every question tagged with a particular tag.
 
 If the tag does not exist it returns an empty array.
 
@@ -1713,7 +1713,7 @@ Params: {
     tag_id: number;
 }
 
-Response body: number[]
+Response body: Question[]
 Possible errors:
   - None
 ```
@@ -1724,9 +1724,14 @@ Example:
 URL: GET http://localhost:4000/api/tag/question/21/questions
 
 Response body: [
-    17,
-    18,
-    231
+    {
+        "id": 1319,
+        "profile_id": 8,
+        "prompt": "New prompt for question",
+        "description": "New description for question",
+        "created": "2020-07-11T00:34:01.000Z",
+        "updated": "2020-07-11T00:34:01.000Z"
+    }
 ]
 ```
 
