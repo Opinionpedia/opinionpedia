@@ -2,6 +2,8 @@
 // The endpoint are:
 //
 // List         GET   /api/question
+// List         GET   /api/question/:question_index
+// Number       GET   /api/question/count
 // Details      GET   /api/question/:question_id
 // Create       POST  /api/question
 // Modify       PATCH /api/question/:question_id
@@ -63,6 +65,35 @@ export default (router: Router): void => {
                 conn
             );
 
+            res.json(questions);
+        })
+    );
+
+    // count questions handler
+    router.get(
+        '/count',
+        wrapAsync(async (req, res) => {
+            notAvailableInProduction();
+
+            const conn = await getConn(req);
+            const count: number = await model.getQuestionsCount(
+                conn
+            );
+
+            res.json(count);
+        })
+    );
+
+    // List questions with pagination handler
+    router.get(
+        '/:question_index',
+        wrapAsync(async (req, res) => {
+            const start_index = validateIdParam(req.params.question_index);
+            const conn = await getConn(req);
+            const questions: ListQuestionsResBody = await model.getQuestionsWithPagination(
+                conn,
+                start_index
+            );
             res.json(questions);
         })
     );

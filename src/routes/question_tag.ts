@@ -3,6 +3,7 @@
 //
 // List    GET   /api/tag/question/:question_id/tags
 // List    GET   /api/tag/question/:tag_id/questions
+// List    GET   /api/tag/question/:tag_id/questions/:question_index
 // Number  GET   /api/tag/question/:tag_id/count
 // Create  POST  /api/tag/question
 //
@@ -82,6 +83,24 @@ export default (router: Router): void => {
             const questionIds: ListQuestionsWithTagResBody = await tagModel.getQuestionsWithTag(
                 conn,
                 tag_id
+            );
+
+            res.json(questionIds);
+        })
+    );
+
+    // List questions with tag handler
+    router.get(
+        '/:tag_id/questions/:question_index',
+        wrapAsync(async (req, res) => {
+            const tag_id = validateIdParam(req.params.tag_id);
+            const start_index = validateIdParam(req.params.question_index);
+
+            const conn = await getConn(req);
+            const questionIds: ListQuestionsWithTagResBody = await tagModel.getQuestionsWithTagWithPagination(
+                conn,
+                tag_id,
+                start_index
             );
 
             res.json(questionIds);

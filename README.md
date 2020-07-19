@@ -140,6 +140,7 @@ Table of contents
   - [Login](#login)
 - Questions
   - [List questions](#list-questions)
+  - [List questions with pagination](#list-question-pagination)
   - [Detail question](#detail-question)
   - [Create question](#create-question)
   - [Modify question](#modify-question)
@@ -167,6 +168,8 @@ Table of contents
 - Question tags
   - [List tags on question](#list-tags-on-question)
   - [List questions with tag](#list-questions-with-tag)
+  - [List questions with tag with pagination](#list-question-pagination)
+
   - [Create question tag](#create-question-tag)
 
 
@@ -459,6 +462,88 @@ Response body: [
         created: "2020-06-20T20:00:00.000Z",
         updated: "2020-06-20T20:00:00.000Z"
     }
+]
+```
+
+
+
+count questions
+--------------
+
+Get count for all questions.
+
+
+```
+Method: GET
+Path: /api/question/count
+
+Response body: {
+    COUNT(*): number
+}
+Possible errors:
+  - HTTP 403: Not available in production
+```
+
+Example:
+
+```
+URL: GET http://localhost:4000/api/question/count
+
+Response body: {
+    COUNT(*): number
+}
+```
+
+
+List questions with pagination
+------------------------------
+
+Get details for the 20 questions, after the given offset.
+
+The profile\_id for a question is its owner.
+
+```
+Method: GET
+Path: /api/question/:question_index
+
+Response body: {
+    id: number;
+    profile_id: number;
+    prompt: string;
+    description: string;
+    created: string;
+    updated: string;
+}[]
+Possible errors:
+  - HTTP 403: Not available in production
+```
+
+Example:
+
+```
+URL: GET http://localhost:4000/api/question/20
+
+Response body: [
+    {
+        id: 20,
+        profile_id: 5,
+        prompt: "What is your favorite children's book?",
+        description: "I'm looking for ideas for my niece.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {
+        id: 21,
+        profile_id: 5,
+        prompt: "Are landscape photos better at sunrise or sunset?",
+        description: "I've been wondering about this for a while.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...},
 ]
 ```
 
@@ -1734,6 +1819,62 @@ Response body: [
     }
 ]
 ```
+
+
+
+List questions with tags with pagination
+------------------------------
+
+Get details for the 20 questions, after the given offset with given tag. Only available in development mode.
+
+The profile\_id for a question is its owner.
+
+```
+Method: GET
+Path: /api/question/:tag_id/questions/:question_index
+
+Response body: {
+    id: number;
+    profile_id: number;
+    prompt: string;
+    description: string;
+    created: string;
+    updated: string;
+}[]
+Possible errors:
+  - HTTP 403: Not available in production
+```
+
+Example:
+
+```
+URL: GET http://localhost:4000/api/question/20/questions/0
+
+Response body: [
+    {
+        id: 20,
+        profile_id: 5,
+        prompt: "What is your favorite children's book?",
+        description: "I'm looking for ideas for my niece.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {
+        id: 21,
+        profile_id: 5,
+        prompt: "Are landscape photos better at sunrise or sunset?",
+        description: "I've been wondering about this for a while.",
+        created: "2020-06-20T20:00:00.000Z",
+        updated: "2020-06-20T20:00:00.000Z"
+    },
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...}, {...}, {...},
+    {...}, {...}, {...},
+]
+```
+
+
 
 Count questions with tag
 -----------------------

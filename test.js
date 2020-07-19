@@ -223,7 +223,11 @@ async function test() {
     console.log('================');
 
     log(await get(200, { path: '/question' }));
+    log(await get(200, { path: '/question/count' }));
+    log(await get(200, { path: '/question/0' }));
 
+
+    
     res = await post(200, {
         path: '/question',
         token,
@@ -446,6 +450,8 @@ async function test() {
     }));
 
     log(await get(200, { path: `/tag/question/${tag_id}/questions` }));
+
+    log(await get(200, { path: `/tag/question/${tag_id}/questions/${0}` }));
 
     log(await get(200, { path: `/tag/question/${question_id}/tags` }));
 

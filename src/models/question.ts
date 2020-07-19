@@ -55,6 +55,28 @@ export async function getQuestions(conn: Conn): Promise<Question[]> {
     return questions;
 }
 
+export async function getQuestionsCount(conn: Conn): Promise<number> {
+    // TODO: Add pagination. Don't actually serve all questions in one request.
+
+    const stmt = SQL`SELECT COUNT(*) FROM question`;
+    const results = await conn.query(stmt);
+    const number = results.asRows() as number[];
+
+    return number[0];
+}
+
+export async function getQuestionsWithPagination(
+    conn: Conn,
+    start_index: number
+): Promise<Question[]> {
+    let end_index: number = start_index+20
+    const stmt = SQL`SELECT * FROM question LIMIT ${start_index}, ${end_index}`;
+    const results = await conn.query(stmt);
+    const questions = results.asRows() as Question[];
+
+    return questions;
+}
+
 export async function getQuestion(
     conn: Conn,
     id: number
