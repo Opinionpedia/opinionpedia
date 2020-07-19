@@ -224,7 +224,7 @@ async function test() {
 
     log(await get(200, { path: '/question' }));
     log(await get(200, { path: '/question/count' }));
-    log(await get(200, { path: '/question/0' }));
+    log(await get(200, { path: '/question/20' }));
 
 
     

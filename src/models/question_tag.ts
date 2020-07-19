@@ -53,15 +53,14 @@ export async function getQuestionsWithTag(
 export async function getQuestionsWithTagWithPagination(
     conn: Conn,
     tag_id: number,
-    start_index: number
+    index: number
 ): Promise<Question[]> {
-    const end_index: number = start_index + 20;
     const stmt = SQL`
         SELECT question.*
         FROM question
          RIGHT JOIN question_tag ON question.id=question_tag.question_id
         WHERE question_tag.tag_id = ${tag_id}
-        LIMIT ${start_index}, ${end_index};
+        LIMIT ${index}, 20;
         `;
     const results = await conn.query(stmt);
     const questions = results.asRows() as Question[];
