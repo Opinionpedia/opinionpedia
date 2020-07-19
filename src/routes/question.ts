@@ -76,9 +76,7 @@ export default (router: Router): void => {
             notAvailableInProduction();
 
             const conn = await getConn(req);
-            const count: number = await model.getQuestionsCount(
-                conn
-            );
+            const count: number = await model.getQuestionsCount(conn);
 
             res.json(count);
         })

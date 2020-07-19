@@ -69,7 +69,7 @@ export async function getQuestionsWithPagination(
     conn: Conn,
     start_index: number
 ): Promise<Question[]> {
-    let end_index: number = start_index+20
+    const end_index: number = start_index + 20;
     const stmt = SQL`SELECT * FROM question LIMIT ${start_index}, ${end_index}`;
     const results = await conn.query(stmt);
     const questions = results.asRows() as Question[];

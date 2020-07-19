@@ -55,7 +55,7 @@ export async function getQuestionsWithTagWithPagination(
     tag_id: number,
     start_index: number
 ): Promise<Question[]> {
-    let end_index: number = start_index+20
+    const end_index: number = start_index + 20;
     const stmt = SQL`
         SELECT question.*
         FROM question
