@@ -73,8 +73,6 @@ export default (router: Router): void => {
     router.get(
         '/count',
         wrapAsync(async (req, res) => {
-            notAvailableInProduction();
-
             const conn = await getConn(req);
             const count: number = await model.getQuestionsCount(conn);
 
@@ -84,13 +82,13 @@ export default (router: Router): void => {
 
     // List questions with pagination handler
     router.get(
-        '/:question_index',
+        '/page/:index',
         wrapAsync(async (req, res) => {
-            const start_index = validateIdParam(req.params.question_index);
+            const index = validateIdParam(req.params.index);
             const conn = await getConn(req);
             const questions: ListQuestionsResBody = await model.getQuestionsWithPagination(
                 conn,
-                start_index
+                index
             );
             res.json(questions);
         })

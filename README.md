@@ -504,7 +504,7 @@ The profile\_id for a question is its owner.
 
 ```
 Method: GET
-Path: /api/question/:question_index
+Path: /api/question/page/:question_index
 
 Response body: {
     id: number;
@@ -521,7 +521,7 @@ Possible errors:
 Example:
 
 ```
-URL: GET http://localhost:4000/api/question/20
+URL: GET http://localhost:4000/api/question/page/20
 
 Response body: [
     {
