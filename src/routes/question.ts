@@ -75,7 +75,6 @@ export default (router: Router): void => {
         wrapAsync(async (req, res) => {
             const conn = await getConn(req);
             const count: number = await model.getQuestionsCount(conn);
-
             res.json(count);
         })
     );
@@ -84,12 +83,13 @@ export default (router: Router): void => {
     router.get(
         '/page/:index',
         wrapAsync(async (req, res) => {
-            const index = validateIdParam(req.params.index);
+            const index: number = validateIdParam(req.params.index);
             const conn = await getConn(req);
             const questions: ListQuestionsResBody = await model.getQuestionsWithPagination(
                 conn,
                 index
             );
+
             res.json(questions);
         })
     );

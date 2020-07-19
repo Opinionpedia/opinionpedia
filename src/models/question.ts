@@ -54,16 +54,11 @@ export async function getQuestions(conn: Conn): Promise<Question[]> {
 }
 
 export async function getQuestionsCount(conn: Conn): Promise<number> {
-    const stmt = SQL`SELECT COUNT(*) AS count FROM question`;
+    const stmt = SQL`SELECT COUNT(id) AS count FROM question`;
     const results = await conn.query(stmt);
     const countArray = results.asRows() as { count: number }[];
 
-    let count = 0;
-    for (const c of countArray) {
-        count = c.count;
-    }
-
-    return count;
+    return countArray[0].count;
 }
 
 export async function getQuestionsWithPagination(
