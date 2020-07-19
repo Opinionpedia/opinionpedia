@@ -478,7 +478,7 @@ Method: GET
 Path: /api/question/count
 
 Response body: {
-    COUNT(*): number
+    number
 }
 Possible errors:
   - HTTP 403: Not available in production
@@ -490,7 +490,7 @@ Example:
 URL: GET http://localhost:4000/api/question/count
 
 Response body: {
-    COUNT(*): number
+    1043
 }
 ```
 

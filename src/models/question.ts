@@ -46,8 +46,6 @@ export function isDescriptionValid(value: unknown): boolean {
 }
 
 export async function getQuestions(conn: Conn): Promise<Question[]> {
-    // TODO: Add pagination. Don't actually serve all questions in one request.
-
     const stmt = SQL`SELECT * FROM question`;
     const results = await conn.query(stmt);
     const questions = results.asRows() as Question[];
@@ -56,13 +54,16 @@ export async function getQuestions(conn: Conn): Promise<Question[]> {
 }
 
 export async function getQuestionsCount(conn: Conn): Promise<number> {
-    // TODO: Add pagination. Don't actually serve all questions in one request.
-
-    const stmt = SQL`SELECT COUNT(*) FROM question`;
+    const stmt = SQL`SELECT COUNT(*) AS count FROM question`;
     const results = await conn.query(stmt);
-    const number = results.asRows() as number[];
+    const countArray = results.asRows() as { count: number }[];
 
-    return number[0];
+    let count = 0;
+    for (const c of countArray) {
+        count = c.count;
+    }
+
+    return count;
 }
 
 export async function getQuestionsWithPagination(

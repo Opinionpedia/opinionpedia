@@ -76,11 +76,11 @@ export async function countQuestionsWithTag(
         FROM question_tag
         WHERE tag_id = ${tag_id}`;
     const results = await conn.query(stmt);
-    const question_tags = results.asRows() as { count: number }[];
+    const countArray = results.asRows() as { count: number }[];
 
     let count = 0;
-    for (const question_tag of question_tags) {
-        count = question_tag.count;
+    for (const c of countArray) {
+        count = c.count;
     }
 
     return count;
