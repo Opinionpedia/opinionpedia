@@ -123,8 +123,8 @@ export default (router: Router): void => {
                 if (hasCode(err, ERR_MYSQL_DUP_ENTRY)) {
                     // Tag already exists.
                     // throw new ResourceAlreadyExistsDBError();
-                    tag_id = await model.getTagByName(conn, name)
-                    tag_id = tag_id?.id
+                    tag_id = await model.getTagByName(conn, name);
+                    tag_id = tag_id?.id;
                 } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
                     // Rare: The profile doesn't exist in the database.
                     throw new ReferencedResourceNotFound();
@@ -133,7 +133,7 @@ export default (router: Router): void => {
                 }
             }
             let resBody: CreateTagResBody | null = null;
-            if (tag_id !== undefined){
+            if (tag_id !== undefined) {
                 resBody = { tag_id };
             }
 
