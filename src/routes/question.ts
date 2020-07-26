@@ -58,8 +58,6 @@ export default (router: Router): void => {
     router.get(
         '/',
         wrapAsync(async (req, res) => {
-            notAvailableInProduction();
-
             const conn = await getConn(req);
             const questions: ListQuestionsResBody = await model.getQuestions(
                 conn
