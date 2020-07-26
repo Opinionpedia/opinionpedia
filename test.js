@@ -181,7 +181,7 @@ async function test() {
     console.log('TESTING PROFILE');
     console.log('===============');
 
-    log(await get(200, { path: '/profile' }));
+    //log(await get(200, { path: '/profile' }));
 
     const username = 'testuser-' + randomNumber();
     let password = 'password';
@@ -256,7 +256,7 @@ async function test() {
     console.log('TESTING OPTION');
     console.log('==============');
 
-    log(await get(200, { path: '/option' }));
+    //log(await get(200, { path: '/option' }));
 
     res = await post(200, {
         path: '/option',
@@ -287,7 +287,7 @@ async function test() {
     console.log('TESTING VOTE');
     console.log('============');
 
-    log(await get(200, { path: '/vote' }));
+    //log(await get(200, { path: '/vote' }));
 
     res = await post(200, {
         path: '/vote',
