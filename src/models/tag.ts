@@ -102,10 +102,8 @@ export async function getTagByName(
 export async function createTag(conn: Conn, tag: CreateTag): Promise<number> {
     const {
         profile_id,
-
         name,
         description,
-
         category,
     } = tag;
 
@@ -116,6 +114,7 @@ export async function createTag(conn: Conn, tag: CreateTag): Promise<number> {
     const results = await conn.query(stmt);
 
     const id = results.asOk().insertId;
+    console.log(id)
     return id;
 }
 
