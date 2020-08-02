@@ -399,6 +399,18 @@ async function test() {
         },
     }));
 
+    // Tag with null category.
+    log(await post(200, {
+        path: '/tag',
+        token,
+        body: {
+            profile_id,
+            name: `Name for ${tagName2}`,
+            description: `Description for ${tagName2}`,
+            category: null,
+        },
+    }));
+
     // Tag with invalid category.
     const tagName3 = 'tag-' + randomNumber();
     log(await post(400, {

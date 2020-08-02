@@ -101,16 +101,15 @@ export async function getTagByName(
 
 export async function createTag(conn: Conn, tag: CreateTag): Promise<number> {
     const { profile_id, name, description, category } = tag;
-
-    const stmt = SQL`
-        INSERT INTO tag (profile_id, name, description, category)
-        VALUES (${profile_id}, ${name}, ${description}, ${category})`;
-
-    const results = await conn.query(stmt);
-
-    const id = results.asOk().insertId;
-    console.log(id);
-    return id;
+    const oldTag = await getTagByName(conn, name)
+    if(oldTag === null){
+        const stmt = SQL`
+            INSERT INTO tag (profile_id, name, description, category)
+            VALUES (${profile_id}, ${name}, ${description}, ${category})`;
+        const results = await conn.query(stmt);
+        return results.asOk().insertId;
+    }
+    return oldTag.id;
 }
 
 export async function updateTag(conn: Conn, tag: UpdateTag): Promise<void> {
