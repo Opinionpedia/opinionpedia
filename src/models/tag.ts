@@ -101,8 +101,8 @@ export async function getTagByName(
 
 export async function createTag(conn: Conn, tag: CreateTag): Promise<number> {
     const { profile_id, name, description, category } = tag;
-    const oldTag = await getTagByName(conn, name)
-    if(oldTag === null){
+    const oldTag = await getTagByName(conn, name);
+    if (oldTag === null) {
         const stmt = SQL`
             INSERT INTO tag (profile_id, name, description, category)
             VALUES (${profile_id}, ${name}, ${description}, ${category})`;
