@@ -97,20 +97,15 @@ export default (router: Router): void => {
     router.delete(
         '/:tag_id',
         wrapAsync(async (req, res) => {
-
             const tag_id = validateIdParam(req.params.tag_id);
 
             // Must be logged in to create a profile tag. IP address profiles
             // cannot have profile tags associated with them.
             const profile_id = await getProfileID(req);
-            console.log('here');
 
             const conn = await getConn(req);
-            console.log(tag_id + ", " + profile_id);
-            console.log('here');
 
             try {
-                console.log(tag_id + ", " + profile_id);
                 await model.deleteProfileTag(conn, {
                     tag_id,
                     profile_id,
