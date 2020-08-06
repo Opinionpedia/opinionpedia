@@ -3,6 +3,7 @@
 //
 // List    GET   /api/tag/profile/:profile_id
 // Create  POST  /api/tag/profile
+// Delete  DELETE  /api/tag/profile
 //
 
 import { Router } from 'express';
@@ -16,6 +17,7 @@ import {
     validateBodyProps,
     validateIdParam,
     validateRequestJWT,
+    getProfileID,
     wrapAsync,
 } from './util.js';
 
@@ -32,6 +34,9 @@ type ListTagsOnProfileResBody = model.TagOnProfile[];
 
 type CreateProfileTagReqBody = Omit<model.ProfileTag, 'profile_id'>;
 type CreateProfileTagResBody = null;
+
+type DeleteProfileTagReqBody = Omit<model.ProfileTag, 'profile_id'>;
+type DeleteProfileTagResBody = null;
 
 export default (router: Router): void => {
     // List tags on profile handler
@@ -77,6 +82,41 @@ export default (router: Router): void => {
                     // This profile tag already existed.
                     throw new ResourceAlreadyExistsDBError();
                 } else if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
+                    // The profile and/or tag doesn't exist in the database.
+                    throw new ReferencedResourceNotFound();
+                } else {
+                    throw err;
+                }
+            }
+
+            res.sendStatus(200);
+        })
+    );
+
+    // Delete profile tag handler
+    router.delete(
+        '/:tag_id',
+        wrapAsync(async (req, res) => {
+
+            const tag_id = validateIdParam(req.params.tag_id);
+
+            // Must be logged in to create a profile tag. IP address profiles
+            // cannot have profile tags associated with them.
+            const profile_id = await getProfileID(req);
+            console.log('here');
+
+            const conn = await getConn(req);
+            console.log(tag_id + ", " + profile_id);
+            console.log('here');
+
+            try {
+                console.log(tag_id + ", " + profile_id);
+                await model.deleteProfileTag(conn, {
+                    tag_id,
+                    profile_id,
+                });
+            } catch (err) {
+                if (hasCode(err, ERR_MYSQL_NO_REFERENCED_ROW)) {
                     // The profile and/or tag doesn't exist in the database.
                     throw new ReferencedResourceNotFound();
                 } else {

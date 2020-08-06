@@ -1737,6 +1737,42 @@ No response body.
 
 
 
+Delete profile tag
+------------------
+
+Removes a tag to the current profile. The current profile is implied via the
+authorization header.
+
+If the profile does not have the tag, an HTTP 200 is returned.
+
+```
+Method: DELETE
+Path: /api/tag/profile/:tag_id
+Headers: {
+    Authorization: string;
+}
+
+No response body.
+Possible errors:
+  - HTTP 400: Invalid Authorization header: malformed or expired value
+  - HTTP 400: Invalid request parameters
+  - HTTP 403: Missing Authorization header
+  - HTTP 404: Referenced resource not found
+```
+
+Example:
+
+```
+URL: POST http://localhost:4000/api/tag/profile/12
+Headers: {
+    Authorization: "Bearer my.jwt.here"
+}
+
+No response body.
+```
+
+
+
 List tags on question
 ---------------------
 

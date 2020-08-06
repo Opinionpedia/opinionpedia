@@ -45,3 +45,19 @@ export async function createProfileTag(
 
     await conn.query(stmt);
 }
+
+export async function deleteProfileTag(
+    conn: Conn,
+    profileTag: ProfileTag
+): Promise<boolean> {
+    const { tag_id, profile_id } = profileTag;
+
+    const stmt = SQL`
+        DELETE FROM profile_tag 
+        WHERE tag_id = ${tag_id} AND profile_id = ${profile_id}`;
+
+    const results = await conn.query(stmt);
+    const { affectedRows } = results.asOk();
+
+    return affectedRows === 1;
+}

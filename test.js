@@ -451,6 +451,14 @@ async function test() {
 
     log(await get(200, { path: `/tag/profile/${profile_id}` }));
 
+    log(await del(200, {
+        path: `/tag/profile/${tag_id}`,
+        token,
+    }));
+
+    log(await get(200, { path: `/tag/profile/${profile_id}` }));
+
+
     console.log('====================');
     console.log('TESTING QUESTION TAG');
     console.log('====================');
